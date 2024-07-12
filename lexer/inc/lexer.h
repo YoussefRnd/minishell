@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:01:12 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/11 19:22:03 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/12 13:21:37 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,8 @@ typedef enum s_token_type
 	TOKEN_HEREDOC,
 	TOKEN_LPAREN,
 	TOKEN_RPAREN,
-	TOKEN_EOFs
+	TOKEN_EOF,
+	TOKEN_UNKNOWN
 }					t_token_type;
 
 typedef struct s_token
