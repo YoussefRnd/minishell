@@ -1,15 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
+/*   utils.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/11 16:59:08 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/13 18:54:24 by yboumlak         ###   ########.fr       */
+/*   Created: 2024/07/13 11:04:42 by yboumlak          #+#    #+#             */
+/*   Updated: 2024/07/13 11:05:06 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../lib/Libft/libft.h"
-#include <stdbool.h>
-#include <stdlib.h>
+#ifndef UTILS_H
+# define UTILS_H
+
+# include "../inc/minishell.h"
+
+int	ft_isspace(char c);
+#endif
