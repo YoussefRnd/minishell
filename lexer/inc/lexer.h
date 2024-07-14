@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:01:12 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/13 19:19:51 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/14 16:11:27 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ typedef struct s_redirection
 {
 	t_token_type			type;
 	char					*file;
+	char					*delimiter;
 	struct s_redirection	*next;
 }							t_redirection;
 
@@ -51,8 +52,7 @@ typedef struct s_tree_node
 	t_token					*token;
 	struct s_tree_node		*left;
 	struct s_tree_node		*right;
-	t_redirection			*input_redirections;
-	t_redirection			*output_redirections;
+	t_redirection		*redirections;
 }							t_tree_node;
 
 #endif
