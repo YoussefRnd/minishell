@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/14 19:58:13 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/15 16:57:02 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,16 @@
 
 t_tree_node	*parse(t_token **tokens);
 
-t_token	*create_token(t_token_type type, char *value)
+t_token	*create_token(t_token_type type, char *value, t_quote state)
 {
 	t_token	*token;
 
 	token = malloc(sizeof(t_token));
 	token->type = type;
-	token->value = strdup(value);
+	token->value = value;
+	token->state = state;
+	token->subtokens = NULL;
+	token->next = NULL;
 	return (token);
 }
 
@@ -34,47 +37,59 @@ t_token	*get_next_token(char **input)
 	t_token	*subshell_token;
 	t_token	*last_token;
 	t_token	*token;
+	t_quote	state;
+	char	quote_type;
+	int		quote_count;
+	t_quote	quote_state;
+	int		unattached_quote;
 
-	while (isspace(**input))
-		(*input)++;
+	state = NORMAL;
 	if (**input == '\0')
-		return (create_token(TOKEN_EOF, ""));
-	if (**input == '|')
+		return (create_token(TOKEN_EOF, "", state));
+	if (isspace(**input))
+	{
+		start = *input;
+		while (isspace(**input))
+			(*input)++;
+		value = strndup(start, *input - start);
+		return (create_token(TOKEN_WHITESPACE, value, state));
+	}
+	else if (**input == '|')
 	{
 		if (*(*input + 1) == '|')
 		{
 			(*input) += 2;
-			return (create_token(TOKEN_OR, "||"));
+			return (create_token(TOKEN_OR, "||", state));
 		}
 		(*input)++;
-		return (create_token(TOKEN_PIPE, "|"));
+		return (create_token(TOKEN_PIPE, "|", state));
 	}
 	else if (**input == '<')
 	{
 		if (*(*input + 1) == '<')
 		{
 			(*input) += 2;
-			return (create_token(TOKEN_HEREDOC, "<<"));
+			return (create_token(TOKEN_HEREDOC, "<<", state));
 		}
 		(*input)++;
-		return (create_token(TOKEN_REDIR_IN, "<"));
+		return (create_token(TOKEN_REDIR_IN, "<", state));
 	}
 	else if (**input == '>')
 	{
 		if (*(*input + 1) == '>')
 		{
 			(*input) += 2;
-			return (create_token(TOKEN_REDIR_APPEND, ">>"));
+			return (create_token(TOKEN_REDIR_APPEND, ">>", state));
 		}
 		(*input)++;
-		return (create_token(TOKEN_REDIR_OUT, ">"));
+		return (create_token(TOKEN_REDIR_OUT, ">", state));
 	}
 	else if (**input == '&')
 	{
 		if (*(*input + 1) == '&')
 		{
 			(*input) += 2;
-			return (create_token(TOKEN_AND, "&&"));
+			return (create_token(TOKEN_AND, "&&", state));
 		}
 	}
 	else if (**input == '(')
@@ -94,7 +109,7 @@ t_token	*get_next_token(char **input)
 		{
 			value = strndup(start, *input - start - 1);
 			subshell_input = value;
-			subshell_token = create_token(TOKEN_SUBSHELL, value);
+			subshell_token = create_token(TOKEN_SUBSHELL, value, state);
 			last_token = NULL;
 			while ((token = get_next_token(&subshell_input))->type != TOKEN_EOF)
 			{
@@ -109,67 +124,40 @@ t_token	*get_next_token(char **input)
 		else
 		{
 			fprintf(stderr, "Syntax error: missing closing parenthesis\n");
-			return (create_token(TOKEN_UNKNOWN, ""));
+			return (create_token(TOKEN_UNKNOWN, "", state));
 		}
 	}
-	else if (**input == '"')
+	else if (**input == '\'' || **input == '"')
 	{
+		quote_type = **input;
+		if (**input == '\"')
+			state = IN_DQUOTES;
+		else
+			state = IN_QUOTES;
 		(*input)++;
 		start = *input;
-		while (**input != '"' && **input != '\0')
-			(*input)++;
-		if (**input == '"')
+		while (**input != '\0')
 		{
-			if (start != *input)
+			if (**input == quote_type)
 			{
 				value = strndup(start, *input - start);
 				(*input)++;
-				return (create_token(TOKEN_WORD, value));
+				return (create_token(TOKEN_WORD, value, state));
 			}
 			(*input)++;
 		}
-		else
-		{
-			fprintf(stderr, "Syntax error: missing closing double quote\n");
-			return (create_token(TOKEN_UNKNOWN, ""));
-		}
-	}
-	else if (**input == '\'')
-	{
-		(*input)++;
-		start = *input;
-		while (**input != '\'' && **input != '\0')
-			(*input)++;
-		if (**input == '\'')
-		{
-			if (start != *input)
-			{
-				value = strndup(start, *input - start);
-				(*input)++;
-				return (create_token(TOKEN_WORD, value));
-			}
-			(*input)++;
-		}
-		else
-		{
-			fprintf(stderr, "Syntax error: missing closing single quote\n");
-			return (create_token(TOKEN_UNKNOWN, ""));
-		}
+		fprintf(stderr, "Syntax error: unmatched quote\n");
+		return (create_token(TOKEN_UNKNOWN, "", state));
 	}
 	else
 	{
 		start = *input;
-		while (**input && !strchr("|&()<>\"\'", **input))
-		{
+		while (!isspace(**input) && !strchr("<>|&\"\'", **input))
 			(*input)++;
-		}
-		if (start != *input)
-		{
-			value = strndup(start, *input - start);
-			return (create_token(TOKEN_WORD, value));
-		}
+		value = strndup(start, *input - start);
+		return (create_token(TOKEN_WORD, value, state));
 	}
-	return (create_token(TOKEN_UNKNOWN, ""));
+	return (create_token(TOKEN_UNKNOWN, "", state));
 }
 
 t_token	*tokenize(char *input)
@@ -249,13 +237,12 @@ t_tree_node	*parse_command(t_token **tokens)
 	t_tree_node	*current;
 
 	if (*tokens != NULL && (*tokens)->type == TOKEN_SUBSHELL)
-	{
 		return (parse_subshell(tokens));
-	}
 	node = create_tree_node(*tokens);
 	current = node;
 	*tokens = (*tokens)->next;
-	while (*tokens != NULL && (*tokens)->type == TOKEN_WORD)
+	while (*tokens != NULL && ((*tokens)->type == TOKEN_WORD
+			|| (*tokens)->type == TOKEN_WHITESPACE))
 	{
 		current->right = create_tree_node(*tokens);
 		current = current->right;
@@ -321,80 +308,33 @@ t_tree_node	*parse_subshell(t_token **tokens)
 	return (node);
 }
 
-void	print_redirections(t_redirection *redirections, int depth)
+void	print_token(t_token *token)
 {
-	t_redirection	*current;
-
-	current = redirections;
-	while (current)
+	if (token == NULL)
+		return ;
+	printf("Token type: %d, value: %s, state: %d\n", token->type, token->value,
+		token->state);
+	if (token->subtokens != NULL)
 	{
-		for (int i = 0; i < depth; i++)
-		{
-			printf("    ");
-		}
-		switch (current->type)
-		{
-		case TOKEN_REDIR_IN:
-			printf("REDIRECT_IN(%s)\n", current->file);
-			break ;
-		case TOKEN_REDIR_OUT:
-			printf("REDIRECT_OUT(%s)\n", current->file);
-			break ;
-		case TOKEN_REDIR_APPEND:
-			printf("APPEND(%s)\n", current->file);
-			break ;
-		case TOKEN_HEREDOC:
-			printf("HEREDOC_DILIM(%s)\n", current->delimiter);
-			break ;
-		default:
-			printf("UNKNOWN_REDIRECT\n");
-			break ;
-		}
-		current = current->next;
+		printf("Subtokens:\n");
+		print_token(token->subtokens);
+	}
+	if (token->next != NULL)
+	{
+		printf("Next token:\n");
+		print_token(token->next);
 	}
 }
 
-void	print_tree(t_tree_node *node, int depth)
+void print_tree(t_tree_node *node)
 {
 	if (node == NULL)
-	{
-		return ;
-	}
-	// Print right subtree
-	print_tree(node->right, depth + 1);
-	// Print current node with indentation
-	for (int i = 0; i < depth; i++)
-	{
-		printf("    ");
-	}
-	if (node->token != NULL)
-	{
-		switch (node->token->type)
-		{
-		case TOKEN_WORD:
-			printf("WORD(%s)\n", node->token->value);
-			break ;
-		case TOKEN_PIPE:
-			printf("PIPE(%s)\n", node->token->value);
-			break ;
-		case TOKEN_AND:
-			printf("AND(%s)\n", node->token->value);
-			break ;
-		case TOKEN_OR:
-			printf("OR(%s)\n", node->token->value);
-			break ;
-		case TOKEN_SUBSHELL:
-			printf("SUBSHELL(%s)\n", node->token->value);
-			break ;
-		default:
-			printf("UNKNOWN\n");
-			break ;
-		}
-	}
-	// Print redirections
-	print_redirections(node->redirections, depth + 1);
-	// Print left subtree
-	print_tree(node->left, depth + 1);
+		return;
+
+	printf("Node value: %s\n", node->token->value);
+
+	print_tree(node->right);
+	print_tree(node->left);
 }
 
 int	main(void)
@@ -403,9 +343,10 @@ int	main(void)
 	t_token		*tokens;
 	t_tree_node	*tree;
 
-	input = "ca't' << idk | (''''test'''' -l && ps -e -kfj < fild.txt >> file.txt && (echo test || (wc -l | echo 'yes')))";
+	input = "(ca't' < idk || ''''echo'''' hello) && echo world | cat -e >> file.txt ";
 	tokens = tokenize(input);
+	print_token(tokens);
 	tree = parse(&tokens);
-	print_tree(tree, 0);
+	print_tree(tree);
 	return (0);
 }
