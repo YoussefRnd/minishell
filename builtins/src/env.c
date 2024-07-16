@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   env.c                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/07/16 09:49:31 by hbrahimi          #+#    #+#             */
+/*   Updated: 2024/07/16 12:33:04 by hbrahimi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../inc/minishell.h"
 #include "../inc/env.h"
 
@@ -10,15 +22,31 @@
  */
 t_env *create_env_dict(char **env)
 {
+    t_env *head;
     if (!env)
         return (NULL);
+    head = NULL;
     while(*env)
     {
-        // it's fucking midnight and i can't think of shit
+        append_node(&head, *env);
+        env++;
     }
+    return head;
 }
 
 /**
- * node_init - it will fill the right
- * formations of each env var in a node
- */
+ * respond_to_env - it will respond to env call and print all the enviroment variables
+ * @envp: the 2 array of inherited enviroment variables
+ * Return: none
+*/
+void respond_to_env(char **envp)
+{
+    t_env *the_whole_list = create_env_dict(envp);
+    print_list(the_whole_list);
+    // i gotta free up the list at the end of running
+}
+
+// int main(int ac, char **av, char **envp)
+// {
+//     respond_to_env(envp);
+// }
