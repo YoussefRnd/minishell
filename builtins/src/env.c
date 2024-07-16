@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 09:49:31 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/16 12:33:04 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/16 14:47:20 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
  * create_env_dict - it will create(allocate)!!! a sort of a match of a python dictionary/list
  * that contains in each node in it an enviroment variable with as a pair of 
  * key value and return it to work with it while the whole running of the program
+ * and it should be launched at the beginning of the program
  * @env: the 2d array of enviroment variables inherited from the previous shell
  * Return : on succes the linked list, on failure NULL
  */
@@ -39,14 +40,9 @@ t_env *create_env_dict(char **env)
  * @envp: the 2 array of inherited enviroment variables
  * Return: none
 */
-void respond_to_env(char **envp)
+void respond_to_env(t_env *the_whole_list)
 {
-    t_env *the_whole_list = create_env_dict(envp);
+    // t_env *the_whole_list = create_env_dict(envp);
     print_list(the_whole_list);
     // i gotta free up the list at the end of running
 }
-
-// int main(int ac, char **av, char **envp)
-// {
-//     respond_to_env(envp);
-// }

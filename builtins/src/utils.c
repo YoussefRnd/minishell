@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 09:49:45 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/16 12:32:44 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/16 13:11:30 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,4 +111,16 @@ void print_list(t_env *head)
         printf("%s=%s\n", current->key, current->value);
         current = current->next;
     }
+}
+
+int	ft_strcmp(char *s1, char *s2)
+{
+	if (!s1 || !s2)
+		return (0);
+	while (*s1 && (*s1 == *s2))
+	{
+		s1++;
+		s2++;
+	}
+	return (*s1 - *s2);
 }
