@@ -6,31 +6,13 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 12:55:29 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/16 15:17:52 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/16 17:18:43 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
-#include "../inc/env.h"
+#include "../inc/builtins.h"
 
-/**
- * respond_to_export - respond to export call
- * @list: the enviroment variables
- * @args: the args of export
- * Return: none
-*/
-void respond_to_export(t_env *list, char **args)
-{
-    if (!args)
-        print_list_exp(list);
-    else
-        while(*args)
-        {
-            append_node(&list, *args);
-            args++;
-        }
-    // i gotta handle failures
-}
 
 void print_list_exp(t_env *list)
 {
@@ -49,4 +31,29 @@ void print_list_exp(t_env *list)
         current = current->next;
     }
 }
+/**
+ * respond_to_export - respond to export call
+ * @list: the enviroment variables
+ * @args: the args of export
+ * Return: none
+*/
+void respond_to_export(t_env **list, char **args)
+{
+    if (!args)
+        print_list_exp(*list);
+    else
+        while(*args)
+        {
+            append_node(list, *args);
+            args++;
+        }
+    // i gotta handle failures
+}
 
+int main(int ac, char **av, char **envp)
+{
+    t_env *list = create_env_dict(envp);
+    char *args[3] = {"key=value", "noice", NULL};
+    respond_to_export(&list, args);
+    print_list(list);
+}

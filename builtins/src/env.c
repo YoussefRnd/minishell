@@ -6,12 +6,12 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 09:49:31 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/16 14:47:20 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/16 17:18:09 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
-#include "../inc/env.h"
+#include "../inc/builtins.h"
 
 /**
  * create_env_dict - it will create(allocate)!!! a sort of a match of a python dictionary/list
@@ -42,7 +42,6 @@ t_env *create_env_dict(char **env)
 */
 void respond_to_env(t_env *the_whole_list)
 {
-    // t_env *the_whole_list = create_env_dict(envp);
     print_list(the_whole_list);
-    // i gotta free up the list at the end of running
+    // !!! this to be handled in case of a variable that doesn't conatain a value
 }

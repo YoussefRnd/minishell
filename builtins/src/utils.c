@@ -6,12 +6,12 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 09:49:45 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/16 13:11:30 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/16 17:18:55 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
-#include "../inc/env.h"
+#include "../inc/builtins.h"
 
 /**
  * split_it - it will split the string passed to it on half
