@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/15 16:57:02 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/16 20:26:04 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,12 +197,20 @@ void	add_redirection(t_tree_node *node, t_token *token)
 {
 	t_redirection	*redir;
 	t_redirection	*current;
+	t_token			*file_token;
 
 	redir = malloc(sizeof(t_redirection));
 	redir->type = token->type;
-	redir->file = strdup(token->next->value);
+	file_token = token->next;
+	while (file_token && file_token->type == TOKEN_WHITESPACE)
+		file_token = file_token->next;
+	if (file_token)
+		redir->file = strdup(file_token->value);
+	else
+		redir->file = NULL;
+	redir->fd = -1;
 	if (token->type == TOKEN_HEREDOC)
-		redir->delimiter = strdup(token->next->value);
+		redir->delimiter = strdup(file_token->value);
 	else
 		redir->delimiter = NULL;
 	redir->next = NULL;
@@ -225,7 +233,11 @@ void	parse_redirections(t_tree_node *node, t_token **tokens)
 			|| (*tokens)->type == TOKEN_HEREDOC))
 	{
 		add_redirection(node, *tokens);
-		*tokens = (*tokens)->next->next;
+		*tokens = (*tokens)->next;
+		while (*tokens && (*tokens)->type == TOKEN_WHITESPACE)
+			*tokens = (*tokens)->next;
+		if (*tokens)
+			*tokens = (*tokens)->next;
 	}
 }
 
@@ -235,20 +247,60 @@ t_tree_node	*parse_command(t_token **tokens)
 {
 	t_tree_node	*node;
 	t_tree_node	*current;
+	char		*value;
+	t_token		*next;
+	t_tree_node	*subshell_node;
 
-	if (*tokens != NULL && (*tokens)->type == TOKEN_SUBSHELL)
-		return (parse_subshell(tokens));
-	node = create_tree_node(*tokens);
-	current = node;
-	*tokens = (*tokens)->next;
-	while (*tokens != NULL && ((*tokens)->type == TOKEN_WORD
-			|| (*tokens)->type == TOKEN_WHITESPACE))
+	node = NULL;
+	current = NULL;
+	while (*tokens && ((*tokens)->type == TOKEN_WORD
+			|| (*tokens)->type == TOKEN_WHITESPACE
+			|| (*tokens)->type == TOKEN_SUBSHELL))
 	{
-		current->right = create_tree_node(*tokens);
-		current = current->right;
+		if ((*tokens)->type == TOKEN_WHITESPACE)
+		{
+			*tokens = (*tokens)->next;
+			continue ;
+		}
+		if ((*tokens)->type == TOKEN_SUBSHELL)
+		{
+			subshell_node = parse_subshell(tokens);
+			if (node == NULL)
+			{
+				node = subshell_node;
+				current = node;
+			}
+			else
+			{
+				current->right = subshell_node;
+				current = current->right;
+			}
+			continue ;
+		}
+		while ((*tokens)->type == TOKEN_WORD && (*tokens)->next
+			&& (*tokens)->next->type == TOKEN_WORD)
+		{
+			value = ft_strjoin((*tokens)->value, (*tokens)->next->value);
+			free((*tokens)->value);
+			(*tokens)->value = value;
+			next = (*tokens)->next;
+			(*tokens)->next = next->next;
+			free(next);
+		}
+		if (node == NULL)
+		{
+			node = create_tree_node(*tokens);
+			current = node;
+		}
+		else
+		{
+			current->right = create_tree_node(*tokens);
+			current = current->right;
+		}
 		*tokens = (*tokens)->next;
 	}
-	parse_redirections(node, tokens);
+	if (node)
+		parse_redirections(node, tokens);
 	return (node);
 }
 
@@ -287,11 +339,6 @@ t_tree_node	*parse_and_or(t_token **tokens)
 	return (left);
 }
 
-t_tree_node	*parse(t_token **tokens)
-{
-	return (parse_and_or(tokens));
-}
-
 t_tree_node	*parse_subshell(t_token **tokens)
 {
 	t_tree_node	*node;
@@ -306,6 +353,11 @@ t_tree_node	*parse_subshell(t_token **tokens)
 	*tokens = (*tokens)->next;
 	node->left = parse(&subshell_tokens);
 	return (node);
+}
+
+t_tree_node	*parse(t_token **tokens)
+{
+	return (parse_and_or(tokens));
 }
 
 void	print_token(t_token *token)
@@ -326,15 +378,47 @@ void	print_token(t_token *token)
 	}
 }
 
-void print_tree(t_tree_node *node)
+void	print_redirections(t_redirection *redirection, char *indent)
 {
+	while (redirection != NULL)
+	{
+		printf("%sRedirection type: %d, file: %s, delimiter: %s\n", indent,
+			redirection->type, redirection->file,
+			redirection->delimiter ? redirection->delimiter : "NULL");
+		redirection = redirection->next;
+	}
+}
+
+void	print_tree(t_tree_node *node, char *indent, bool is_last)
+{
+	char	new_indent[100];
+
 	if (node == NULL)
-		return;
-
-	printf("Node value: %s\n", node->token->value);
-
-	print_tree(node->right);
-	print_tree(node->left);
+		return ;
+	printf("%s", indent);
+	strcpy(new_indent, indent);
+	if (is_last)
+	{
+		printf("└──");
+		strcat(new_indent, "    ");
+	}
+	else
+	{
+		printf("├──");
+		strcat(new_indent, "│   ");
+	}
+	if (node->token)
+		printf("%s\n", node->token->value);
+	else
+		printf("NULL\n");
+	print_redirections(node->redirections, new_indent);
+	if (node->left || node->right)
+	{
+		if (node->left)
+			print_tree(node->left, new_indent, node->right == NULL);
+		if (node->right)
+			print_tree(node->right, new_indent, true);
+	}
 }
 
 int	main(void)
@@ -343,10 +427,10 @@ int	main(void)
 	t_token		*tokens;
 	t_tree_node	*tree;
 
-	input = "(ca't' < idk || ''''echo'''' hello) && echo world | cat -e >> file.txt ";
+	input = "(cat file.txt | wc -l > count.txt) && echo 'true'";
 	tokens = tokenize(input);
-	print_token(tokens);
+	// print_token(tokens);
 	tree = parse(&tokens);
-	print_tree(tree);
+	print_tree(tree, "", true);
 	return (0);
 }
