@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 09:49:45 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/16 17:18:55 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/19 13:21:37 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,4 +123,34 @@ int	ft_strcmp(char *s1, char *s2)
 		s2++;
 	}
 	return (*s1 - *s2);
+}
+
+int node_exists(t_env **head_ref, char *key)
+{
+    t_env* current = *head_ref;
+
+    while (current != NULL)
+    {
+        if (strcmp(current->key, key) == 0)
+        {
+            return 1; // Node exists
+        }
+        current = current->next;
+    }
+    return 0; // Node does not exist
+}
+void modify_node(t_env **head_ref, char *key, char *new_value)
+{
+    t_env* current = *head_ref;
+
+    while (current != NULL)
+    {
+        if (strcmp(current->key, key) == 0)
+        {
+            free(current->value); // Free the old value
+            current->value = strdup(new_value); // Assign the new value
+            return;
+        }
+        current = current->next;
+    }
 }
