@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/16 20:26:04 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/20 15:18:27 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,6 +242,8 @@ void	parse_redirections(t_tree_node *node, t_token **tokens)
 }
 
 t_tree_node	*parse_subshell(t_token **tokens);
+t_tree_node	*parse_pipe(t_token **tokens);
+t_tree_node	*parse_and_or(t_token **tokens);
 
 t_tree_node	*parse_command(t_token **tokens)
 {
@@ -277,6 +279,8 @@ t_tree_node	*parse_command(t_token **tokens)
 			}
 			continue ;
 		}
+		if ((*tokens)->type == TOKEN_PIPE || (*tokens)->type == TOKEN_AND)
+			break ;
 		while ((*tokens)->type == TOKEN_WORD && (*tokens)->next
 			&& (*tokens)->next->type == TOKEN_WORD)
 		{
@@ -427,7 +431,7 @@ int	main(void)
 	t_token		*tokens;
 	t_tree_node	*tree;
 
-	input = "(cat file.txt | wc -l > count.txt) && echo 'true'";
+	input = "cat file.txt | wc -l > count.txt && echo 'true' || echo 'false'";
 	tokens = tokenize(input);
 	// print_token(tokens);
 	tree = parse(&tokens);
