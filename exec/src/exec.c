@@ -1,19 +1,14 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.h                                            :+:      :+:    :+:   */
+/*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/13 11:04:42 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/13 11:05:06 by yboumlak         ###   ########.fr       */
+/*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
+/*   Updated: 2024/07/20 16:01:15 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef UTILS_H
-# define UTILS_H
+#include "../../inc/minishell.h"
 
-# include "../inc/minishell.h"
-
-int	ft_isspace(char c);
-#endif
