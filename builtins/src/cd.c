@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/19 12:14:46 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/19 13:29:16 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/20 10:52:09 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 void respond_to_cd(char *path, t_env **list)
 {
     char buff[1024];
-    if (access(path, X_OK) != -1)
+    if (access(path, R_OK | X_OK) != -1)
     {
         if (chdir(path) != 0)
             perror("shiiih");
@@ -32,5 +32,6 @@ void respond_to_cd(char *path, t_env **list)
 int main(int ac, char **av, char **envp)
 {
     t_env *list = create_env_dict(envp);
-    respond_to_cd(av[1], &list);
+    char *path = "/Users/hbrahimi/";
+    respond_to_cd(path, &list);
 }
