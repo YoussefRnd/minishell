@@ -1,7 +1,7 @@
 NAME = minishell
 
 CC = cc
-CFLAGS = 
+CFLAGS = -lreadline
 RM = rm -fr
 MKDIR = mkdir -p
 
@@ -12,7 +12,7 @@ LIBFT_LIB = $(LIBFT)/libft.a
 OBJ_DIR = obj
 INC_DIR = inc
 
-SRCS =  $(wildcard lexer/src/*.c) $(wildcard parser/src/*.c) $(wildcard utils/src/*.c)
+SRCS =  $(wildcard lexer/src/*.c) $(wildcard parser/src/*.c) $(wildcard utils/src/*.c) main.c
 
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
