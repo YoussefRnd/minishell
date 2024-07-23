@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/22 19:41:36 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/23 17:25:07 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,6 +125,38 @@ t_token	*get_next_token(char **input)
 			return (create_token(TOKEN_UNKNOWN, "", state));
 		}
 	}
+	else if (**input == ')')
+	{
+		(*input)++;
+		fprintf(stderr, "Syntax error: unexpected closing parenthesis\n");
+		return (create_token(TOKEN_UNKNOWN, "", state));
+	}
+	else if (**input == '$')
+	{
+		(*input)++;
+		if (**input == '?') {
+			(*input)++;
+			return create_token(TOKEN_SPECIAL_VAR, "?", state);
+		}
+		else if (ft_isalnum(**input)) {
+			start = *input;
+			while (ft_isalnum(**input))
+				(*input)++;
+			value = strndup(start, *input - start);
+			if (state == NORMAL || state == IN_DQUOTES)
+				return create_token(TOKEN_ENV, value, state);
+			else
+				return create_token(TOKEN_WORD, value, state);
+		}
+		else {
+			(*input)--;
+			start = *input;
+			while (!isspace(**input) && !strchr("<>|&\"\'", **input))
+				(*input)++;
+			value = strndup(start, *input - start);
+			return create_token(TOKEN_WORD, value, state);
+		}
+	}
 	else if (**input == '\'' || **input == '"')
 	{
 		quote_type = **input;
@@ -146,53 +178,6 @@ t_token	*get_next_token(char **input)
 		}
 		fprintf(stderr, "Syntax error: unmatched quote\n");
 		return (create_token(TOKEN_UNKNOWN, "", state));
-	}
-	else if (**input == '$')
-	{
-		(*input)++;
-		if (**input == '(')
-		{
-			(*input)++;
-			start = *input;
-			nesting_level = 1;
-			while (nesting_level > 0 && **input != '\0')
-			{
-				if (**input == '(')
-					nesting_level++;
-				else if (**input == ')')
-					nesting_level--;
-				(*input)++;
-			}
-			if (nesting_level == 0)
-			{
-				value = strndup(start, *input - start - 1);
-				subshell_input = value;
-				subshell_token = create_token(TOKEN_ENV, value, state);
-				last_token = NULL;
-				while ((token = get_next_token(&subshell_input))->type != TOKEN_EOF)
-				{
-					if (last_token == NULL)
-						subshell_token->subtokens = token;
-					else
-						last_token->next = token;
-					last_token = token;
-				}
-				return (subshell_token);
-			}
-			else
-			{
-				fprintf(stderr, "Syntax error: missing closing parenthesis\n");
-				return (create_token(TOKEN_UNKNOWN, "", state));
-			}
-		}
-		else
-		{
-			start = *input;
-			while (!isspace(**input) && !strchr("<>|&\"\'", **input))
-				(*input)++;
-			value = strndup(start, *input - start);
-			return (create_token(TOKEN_ENV, value, state));
-		}
 	}
 	else
 	{

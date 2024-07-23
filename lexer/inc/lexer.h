@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:01:12 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/22 12:52:28 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/23 12:32:17 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ typedef enum s_token_type
 	TOKEN_HEREDOC,
 	TOKEN_SUBSHELL,
 	TOKEN_ENV,
+	TOKEN_SPECIAL_VAR,
 	TOKEN_EOF,
 	TOKEN_UNKNOWN
 }					t_token_type;

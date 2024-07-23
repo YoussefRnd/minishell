@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/22 19:44:46 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/23 14:44:29 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,9 @@ t_tree_node	*parse_command(t_token **tokens)
 			|| (*tokens)->type == TOKEN_REDIR_IN
 			|| (*tokens)->type == TOKEN_REDIR_OUT
 			|| (*tokens)->type == TOKEN_REDIR_APPEND
-			|| (*tokens)->type == TOKEN_HEREDOC))
+			|| (*tokens)->type == TOKEN_HEREDOC
+			|| (*tokens)->type == TOKEN_ENV
+			|| (*tokens)->type == TOKEN_SPECIAL_VAR))
 	{
 		if ((*tokens)->type == TOKEN_WHITESPACE)
 		{
@@ -159,11 +161,6 @@ t_tree_node	*parse_command(t_token **tokens)
 				free(next);
 			}
 		}
-		if((*tokens)->type == TOKEN_ENV)
-		{
-			(*tokens)->value = getenv((*tokens)->value);
-			(*tokens)->type = TOKEN_WORD;
-		}
 		if (node == NULL)
 		{
 			node = create_tree_node(*tokens);
@@ -173,6 +170,7 @@ t_tree_node	*parse_command(t_token **tokens)
 				attach_redirections(node, redirections);
 				redirections = NULL;
 			}
+			printf("value: %s, type: %u\n", current->token->value, current->token->type);
 		}
 		else
 		{
