@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/23 17:25:07 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/24 12:11:52 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ t_token	*get_next_token(char **input)
 {
 	char	*start;
 	char	*value;
-	int		open_parentheses;
 	int		nesting_level;
 	char	*subshell_input;
 	t_token	*subshell_token;
@@ -37,9 +36,6 @@ t_token	*get_next_token(char **input)
 	t_token	*token;
 	t_quote	state;
 	char	quote_type;
-	int		quote_count;
-	t_quote	quote_state;
-	int		unattached_quote;
 
 	state = NORMAL;
 	if (**input == '\0')

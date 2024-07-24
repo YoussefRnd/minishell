@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/23 14:44:29 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/24 12:05:55 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,7 +170,6 @@ t_tree_node	*parse_command(t_token **tokens)
 				attach_redirections(node, redirections);
 				redirections = NULL;
 			}
-			printf("value: %s, type: %u\n", current->token->value, current->token->type);
 		}
 		else
 		{
