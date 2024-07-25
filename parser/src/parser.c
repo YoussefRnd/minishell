@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/24 12:05:55 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/25 20:35:10 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ t_redirection	*parse_redirection(t_token **tokens)
 		return (NULL);
 	redir->type = (*tokens)->type;
 	redir->next = NULL;
+	redir->fd = -1;
 	file_token = (*tokens)->next;
 	while (file_token && file_token->type == TOKEN_WHITESPACE)
 		file_token = file_token->next;
@@ -47,12 +48,11 @@ t_redirection	*parse_redirection(t_token **tokens)
 		redir->file = NULL;
 		*tokens = (*tokens)->next;
 	}
-	redir->fd = -1;
 	if (redir->type == TOKEN_HEREDOC)
 		redir->delimiter = redir->file;
 	else
 		redir->delimiter = NULL;
-	return (redir); 
+	return (redir);
 }
 
 void	attach_redirections(t_tree_node *node, t_redirection *redir)
@@ -106,9 +106,9 @@ t_tree_node	*parse_command(t_token **tokens)
 			|| (*tokens)->type == TOKEN_REDIR_IN
 			|| (*tokens)->type == TOKEN_REDIR_OUT
 			|| (*tokens)->type == TOKEN_REDIR_APPEND
-			|| (*tokens)->type == TOKEN_HEREDOC
-			|| (*tokens)->type == TOKEN_ENV
-			|| (*tokens)->type == TOKEN_SPECIAL_VAR))
+			|| (*tokens)->type == TOKEN_HEREDOC || (*tokens)->type == TOKEN_ENV
+			|| (*tokens)->type == TOKEN_SPECIAL_VAR
+			|| (*tokens)->type == TOKEN_ERROR))
 	{
 		if ((*tokens)->type == TOKEN_WHITESPACE)
 		{
@@ -137,9 +137,7 @@ t_tree_node	*parse_command(t_token **tokens)
 		{
 			new_redir = parse_redirection(tokens);
 			if (redirections == NULL)
-			{
 				redirections = new_redir;
-			}
 			else
 			{
 				last_redir = redirections;
@@ -178,7 +176,12 @@ t_tree_node	*parse_command(t_token **tokens)
 		}
 		*tokens = (*tokens)->next;
 	}
-	if (node && redirections)
+	if (!node && redirections)
+	{
+		node = create_tree_node(NULL);
+		attach_redirections(node, redirections);
+	}
+	else if (node && redirections)
 		attach_redirections(node, redirections);
 	return (node);
 }
@@ -217,7 +220,6 @@ t_tree_node	*parse_and_or(t_token **tokens)
 	}
 	return (left);
 }
-
 
 t_tree_node	*parse(t_token **tokens)
 {

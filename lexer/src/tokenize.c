@@ -6,11 +6,16 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/24 12:11:52 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/25 19:59:07 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/lexer.h"
+
+void	error(char *msg, char *token)
+{
+	printf("%s `%s'\n", msg, token);
+}
 
 t_token	*create_token(t_token_type type, char *value, t_quote state)
 {
@@ -50,40 +55,66 @@ t_token	*get_next_token(char **input)
 	}
 	else if (**input == '|')
 	{
-		if (*(*input + 1) == '|')
+		start = *input;
+		while (**input == '|')
+			(*input)++;
+		value = strndup(start, *input - start);
+		if (ft_strlen(value) == 1)
+			return (create_token(TOKEN_PIPE, "|", state));
+		else if (ft_strlen(value) == 2)
+			return (create_token(TOKEN_OR, value, state));
+		else
 		{
-			(*input) += 2;
-			return (create_token(TOKEN_OR, "||", state));
+			error("syntax error near unexpected token\n", value);
+			return (create_token(TOKEN_ERROR, "", state));
 		}
-		(*input)++;
-		return (create_token(TOKEN_PIPE, "|", state));
 	}
 	else if (**input == '<')
 	{
-		if (*(*input + 1) == '<')
+		start = *input;
+		while (**input == '<')
+			(*input)++;
+		value = strndup(start, *input - start);
+		if (ft_strlen(value) == 1)
+			return (create_token(TOKEN_REDIR_IN, value, state));
+		else if (ft_strlen(value) == 2)
+			return (create_token(TOKEN_HEREDOC, value, state));
+		else
 		{
-			(*input) += 2;
-			return (create_token(TOKEN_HEREDOC, "<<", state));
+			error("syntax error near unexpected token\n", value);
+			return (create_token(TOKEN_ERROR, "", state));
 		}
-		(*input)++;
-		return (create_token(TOKEN_REDIR_IN, "<", state));
 	}
 	else if (**input == '>')
 	{
-		if (*(*input + 1) == '>')
+		start = *input;
+		while (**input == '>')
+			(*input)++;
+		value = strndup(start, *input - start);
+		if (ft_strlen(value) == 1)
+			return (create_token(TOKEN_REDIR_OUT, value, state));
+		else if (ft_strlen(value) == 2)
+			return (create_token(TOKEN_REDIR_APPEND, value, state));
+		else
 		{
-			(*input) += 2;
-			return (create_token(TOKEN_REDIR_APPEND, ">>", state));
+			error("syntax error near unexpected token\n", value);
+			return (create_token(TOKEN_ERROR, "", state));
 		}
-		(*input)++;
-		return (create_token(TOKEN_REDIR_OUT, ">", state));
 	}
 	else if (**input == '&')
 	{
-		if (*(*input + 1) == '&')
+		start = *input;
+		while (**input == '&')
+			(*input)++;
+		value = strndup(start, *input - start);
+		if (ft_strlen(value) == 1)
+			return (create_token(TOKEN_WORD, value, state));
+		else if (ft_strlen(value) == 2)
+			return (create_token(TOKEN_OR, value, state));
+		else
 		{
-			(*input) += 2;
-			return (create_token(TOKEN_AND, "&&", state));
+			error("syntax error near unexpected token\n", value);
+			return (create_token(TOKEN_ERROR, "", state));
 		}
 	}
 	else if (**input == '(')
@@ -117,40 +148,43 @@ t_token	*get_next_token(char **input)
 		}
 		else
 		{
-			fprintf(stderr, "Syntax error: missing closing parenthesis\n");
-			return (create_token(TOKEN_UNKNOWN, "", state));
+			error("Syntax error: missing closing parenthesis\n", NULL);
+			return (create_token(TOKEN_ERROR, "", state));
 		}
 	}
 	else if (**input == ')')
 	{
 		(*input)++;
-		fprintf(stderr, "Syntax error: unexpected closing parenthesis\n");
-		return (create_token(TOKEN_UNKNOWN, "", state));
+		error("Syntax error: unexpected closing parenthesis\n", NULL);
+		return (create_token(TOKEN_ERROR, "", state));
 	}
 	else if (**input == '$')
 	{
 		(*input)++;
-		if (**input == '?') {
+		if (**input == '?')
+		{
 			(*input)++;
-			return create_token(TOKEN_SPECIAL_VAR, "?", state);
+			return (create_token(TOKEN_SPECIAL_VAR, "?", state));
 		}
-		else if (ft_isalnum(**input)) {
+		else if (ft_isalnum(**input))
+		{
 			start = *input;
 			while (ft_isalnum(**input))
 				(*input)++;
 			value = strndup(start, *input - start);
 			if (state == NORMAL || state == IN_DQUOTES)
-				return create_token(TOKEN_ENV, value, state);
+				return (create_token(TOKEN_ENV, value, state));
 			else
-				return create_token(TOKEN_WORD, value, state);
+				return (create_token(TOKEN_WORD, value, state));
 		}
-		else {
+		else
+		{
 			(*input)--;
 			start = *input;
 			while (!isspace(**input) && !strchr("<>|&\"\'", **input))
 				(*input)++;
 			value = strndup(start, *input - start);
-			return create_token(TOKEN_WORD, value, state);
+			return (create_token(TOKEN_WORD, value, state));
 		}
 	}
 	else if (**input == '\'' || **input == '"')
@@ -172,8 +206,8 @@ t_token	*get_next_token(char **input)
 			}
 			(*input)++;
 		}
-		fprintf(stderr, "Syntax error: unmatched quote\n");
-		return (create_token(TOKEN_UNKNOWN, "", state));
+		error("Syntax error: unmatched quote\n", NULL);
+		return (create_token(TOKEN_ERROR, "", state));
 	}
 	else
 	{
