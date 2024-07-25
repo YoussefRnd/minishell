@@ -6,11 +6,13 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/25 10:09:19 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/24 13:07:05 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // #include "../../inc/minishell.h"
+#include "../../lexer/inc/lexer.h"
+#include "../../parser/inc/parser.h"
 #include "../inc/execution.h"
 
 void _execute(t_tree_node *tree, t_env *env)
@@ -71,3 +73,4 @@ char	*find_path(char *file, char **arr)
 		free(path_buffer);
 	return (perror(file), ft_free(arr), NULL);
 }
+
