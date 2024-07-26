@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/25 19:59:07 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/26 12:41:00 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ t_token	*get_next_token(char **input)
 	char	quote_type;
 
 	state = NORMAL;
+	value = NULL;
 	if (**input == '\0')
 		return (create_token(TOKEN_EOF, "", state));
 	if (isspace(**input))
@@ -65,7 +66,7 @@ t_token	*get_next_token(char **input)
 			return (create_token(TOKEN_OR, value, state));
 		else
 		{
-			error("syntax error near unexpected token\n", value);
+			error("minishell: syntax error near unexpected token", value);
 			return (create_token(TOKEN_ERROR, "", state));
 		}
 	}
@@ -81,7 +82,7 @@ t_token	*get_next_token(char **input)
 			return (create_token(TOKEN_HEREDOC, value, state));
 		else
 		{
-			error("syntax error near unexpected token\n", value);
+			error("minishell: syntax error near unexpected token", value);
 			return (create_token(TOKEN_ERROR, "", state));
 		}
 	}
@@ -97,7 +98,7 @@ t_token	*get_next_token(char **input)
 			return (create_token(TOKEN_REDIR_APPEND, value, state));
 		else
 		{
-			error("syntax error near unexpected token\n", value);
+			error("minishell: syntax error near unexpected token", value);
 			return (create_token(TOKEN_ERROR, "", state));
 		}
 	}
@@ -113,7 +114,7 @@ t_token	*get_next_token(char **input)
 			return (create_token(TOKEN_OR, value, state));
 		else
 		{
-			error("syntax error near unexpected token\n", value);
+			error("minishell: syntax error near unexpected token", value);
 			return (create_token(TOKEN_ERROR, "", state));
 		}
 	}
@@ -148,14 +149,14 @@ t_token	*get_next_token(char **input)
 		}
 		else
 		{
-			error("Syntax error: missing closing parenthesis\n", NULL);
+			error("minishell: syntax error near unexpected token", value);
 			return (create_token(TOKEN_ERROR, "", state));
 		}
 	}
 	else if (**input == ')')
 	{
 		(*input)++;
-		error("Syntax error: unexpected closing parenthesis\n", NULL);
+		error("minishell: syntax error near unexpected token", value);
 		return (create_token(TOKEN_ERROR, "", state));
 	}
 	else if (**input == '$')
@@ -206,7 +207,7 @@ t_token	*get_next_token(char **input)
 			}
 			(*input)++;
 		}
-		error("Syntax error: unmatched quote\n", NULL);
+		error("Syntax error: unmatched quote", NULL);
 		return (create_token(TOKEN_ERROR, "", state));
 	}
 	else
@@ -230,6 +231,12 @@ t_token	*tokenize(char *input)
 	tail = NULL;
 	while ((token = get_next_token(&input))->type != TOKEN_EOF)
 	{
+		if (token->type == TOKEN_ERROR)
+		{
+			// free_tokens(head);
+			// free(token);
+			return (NULL);
+		}
 		if (head == NULL)
 			head = token;
 		else

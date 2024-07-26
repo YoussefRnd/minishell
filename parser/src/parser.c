@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/25 20:35:10 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/26 11:38:20 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,37 @@ t_tree_node	*create_tree_node(t_token *token)
 	node->right = NULL;
 	node->redirections = NULL;
 	return (node);
+}
+
+void	open_redirection_file(t_redirection *redir)
+{
+	int	flags;
+
+	if (redir->type == TOKEN_REDIR_IN)
+		flags = O_RDONLY;
+	else if (redir->type == TOKEN_REDIR_OUT)
+		flags = O_CREAT | O_TRUNC | O_WRONLY;
+	else if (redir->type == TOKEN_REDIR_APPEND)
+		flags = O_CREAT | O_APPEND | O_WRONLY;
+	else if (redir->type == TOKEN_HEREDOC)
+		flags = O_CREAT | O_APPEND | O_WRONLY;
+	if (redir->file)
+	{
+		if (redir->fd != -1)
+			close(redir->fd);
+		if (redir->type == TOKEN_HEREDOC)
+		{
+			redir->fd = open("/tmp/heredoc", flags, 0644);
+			if (redir->fd == -1)
+				perror("minishell");
+		}
+		else
+		{
+			redir->fd = open(redir->file, flags, 0644);
+			if (redir->fd == -1)
+				perror("minishell");
+		}
+	}
 }
 
 t_redirection	*parse_redirection(t_token **tokens)
@@ -52,6 +83,7 @@ t_redirection	*parse_redirection(t_token **tokens)
 		redir->delimiter = redir->file;
 	else
 		redir->delimiter = NULL;
+	open_redirection_file(redir);
 	return (redir);
 }
 
@@ -251,6 +283,7 @@ void	print_redirections(t_redirection *redirection, char *indent)
 		printf("%sRedirection type: %d, file: %s, delimiter: %s\n", indent,
 			redirection->type, redirection->file,
 			redirection->delimiter ? redirection->delimiter : "NULL");
+		printf("%sFile descriptor: %d\n", indent, redirection->fd);
 		redirection = redirection->next;
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:31:45 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/24 11:49:17 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/26 10:18:11 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include "../../lexer/inc/lexer.h"
 # include <stdbool.h>
+# include <fcntl.h>
 
 typedef struct s_redirection
 {
