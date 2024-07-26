@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/26 12:43:09 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/26 16:37:49 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ void	_execute(t_tree_node *tree, t_env *env)
 {
 	pid_t	pid;
 	int	pfd[2];
+	if (!tree)
+		return ;
 
 	// status = malloc(sizeof(int));
 	if (tree->token->type == TOKEN_WORD)
@@ -68,22 +70,36 @@ void	_execute(t_tree_node *tree, t_env *env)
 		else
 			wait(&status);
 	}
-	else if (tree->token->type == TOKEN_ENV)
+	// else if (tree->token->type == TOKEN_HEREDOC || tree->token->type == TOKEN_REDIR_OUT)
+	// {
+	// 	printf("fd :[%d]\n", tree->redirections->fd);
+	// 	dup2(tree->redirections->fd, STDOUT_FILENO);
+	// 	_execute(tree, env);
+	// }
+	else
 	{
-		char *value = get_value(env, tree->token->value);
-		free(tree->token->value);
-		tree->token->value = ft_strdup(value);
-		// printf("%s\n", tree->token->value);
-		printf("inside of token env case");
-		tree->token->type = TOKEN_WORD;
-		_execute(tree, env);
+		printf("%u\n", tree->token->type);
 	}
+	// TO WORK ON LATER 7ITASH HAD L9LAWI M3NKSH
+	// else if (tree->token->type == TOKEN_ENV)
+	// {
+	// 	char *value = get_value(env, tree->token->value);
+	// 	free(tree->token->value);
+	// 	tree->token->value = ft_strdup(value);
+	// 	// printf("%s\n", tree->token->value);
+	// 	printf("inside of token env case\n");
+	// 	tree->token->type = TOKEN_WORD;
+	// 	_execute(tree, env);
+	// }
 }
 
 void operators_deal(t_tree_node *tree, t_env *env)
 {
 	int exit_status;
-	_execute(tree->left, env);
+	if (tree->left)
+		_execute(tree->left, env);
+	else
+		return ;
 	// la lprocess sala normally , meaning mashi bsignal ola shi haja
 	// printf("status: %d\n", status);
 	if (WIFEXITED(status)){
@@ -109,6 +125,40 @@ void	cmd_execute(t_tree_node *cmd, t_env *envps)
 	// printf("cmd: %s\n", cmd->token->value);
 	// printf("args: %s\n", cmd->right->token->value);
 	// i gotta find the path that am a give to execve
+	if (cmd->redirections)
+	{
+		t_redirection *current;
+		current = cmd->redirections;
+		while(current)
+		{
+			if (current->type == TOKEN_REDIR_OUT || current->type == TOKEN_REDIR_APPEND)
+				dup2(current->fd, STDOUT_FILENO);
+			else if (current->type == TOKEN_REDIR_IN)
+				dup2(current->fd, STDIN_FILENO);
+			else if (current->type == TOKEN_HEREDOC){
+				char *line;
+                while ((line = readline("")) != NULL)
+                {
+					// printf("line :[%s]\n", line);
+					// printf("delimiter: [%s]\n", current->delimiter);
+                    if (ft_strcmp(line, current->delimiter) == 0)
+                    {
+                        free(line);
+						// printf("shi l3iba\n");
+                        break;
+                    }
+					write(current->fd, line, ft_strlen(line));
+                    free(line);
+                }
+				close(current->fd);
+				// printf("%s\n", current->file);
+				int fd = open("/tmp/heredoc", O_RDONLY);
+				dup2(fd, STDIN_FILENO);
+				// close(fd);
+			}
+			current = current->next;
+		}
+	}
 	path_dirs = ft_split(find_and_return_value(envps, "PATH"), ':');
 	path = find_path(cmd->token->value, path_dirs);
 	if (!path)
