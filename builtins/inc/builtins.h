@@ -28,5 +28,5 @@ void				find_and_remove(t_env **head_ref, char *key);
 t_env				*create_env_dict(char **env);
 int					ft_strcmp(char *s1, char *s2);
 int					node_exists(t_env **head_ref, char *key);
-void modify_node(t_env **head_ref, char *key, char *new_value);
+void				modify_node(t_env **head_ref, char *key, char *new_value);
 #endif

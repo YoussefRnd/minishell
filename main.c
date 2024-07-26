@@ -6,13 +6,14 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:28:24 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/26 12:31:48 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/26 13:45:18 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc/minishell.h"
 #include "lexer/inc/lexer.h"
 #include "parser/inc/parser.h"
+#include "exec/inc/execution.h"
 
 int	main(int argc, char **argv, char **envp)
 {
@@ -32,7 +33,8 @@ int	main(int argc, char **argv, char **envp)
 		if (!tokens)
 			continue ;
 		tree = parse(&tokens);
-		print_tree(tree, "", true);
+		// print_tree(tree, "", true);
+		_execute(tree, envp);
 		// free_tokens(tokens);
 		// free_tree(tree);
 	}
