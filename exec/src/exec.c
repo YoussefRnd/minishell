@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/26 10:18:22 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/26 12:43:09 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,25 @@ void	_execute(t_tree_node *tree, t_env *env)
 		// if it worked succefully
 		operators_deal(tree, env);
 	}
+	else if (tree->token->type == TOKEN_SUBSHELL){
+		pid = fork();
+		if (!pid)
+			_execute(tree->left, env);
+		else
+			wait(&status);
+	}
+	else if (tree->token->type == TOKEN_ENV)
+	{
+		char *value = get_value(env, tree->token->value);
+		free(tree->token->value);
+		tree->token->value = ft_strdup(value);
+		// printf("%s\n", tree->token->value);
+		printf("inside of token env case");
+		tree->token->type = TOKEN_WORD;
+		_execute(tree, env);
+	}
 }
+
 void operators_deal(t_tree_node *tree, t_env *env)
 {
 	int exit_status;

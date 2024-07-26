@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 09:43:36 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/25 12:32:06 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/26 12:29:44 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,32 +33,16 @@ char* find_and_return_value(t_env *head_ref, char *key)
     return NULL;
 }
 
-// char	**examine(t_tree_node *head)
-// {
-// 	int		count;
-// 	t_tree_node *current;
-// 	char	**array;
-// 	int		i;
-
-// 	current = head;
-// 	count = count_nodes(current);
-// 	array = (char **)malloc((count + 1) * sizeof(char *));
-// 	if (array == NULL)
-// 		return (NULL);
-// 	i = 0;
-// 	current = head;
-// 	while (current != NULL)
-// 	{
-// 		if (ft_strlen(current->token->value) > 0)
-// 		{
-// 			array[i] = current->token->value;
-// 			i++;
-// 		}
-// 		current = current->right;
-// 	}
-// 	array[i] = NULL;
-// 	return (array);
-// }
+char *get_value(t_env *env, char *key) {
+    t_env *current = env;
+    while (current != NULL) {
+        if (strcmp(current->key, key) == 0) {
+            return current->value;
+        }
+        current = current->next;
+    }
+    return NULL;
+}
 
 char **examine(t_tree_node *head, char *path)
 {

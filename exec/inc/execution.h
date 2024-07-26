@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 11:42:38 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/26 10:09:56 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/26 12:30:18 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,5 +32,6 @@ char	*ft_strcpy(char *dest, const char *src);
 char	*ft_strcat(char *dest, const char *src);
 int	count_nodes(t_tree_node *current);
 void operators_deal(t_tree_node *tree, t_env *env);
+char *get_value(t_env *env, char *key);
 
 #endif
