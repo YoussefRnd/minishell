@@ -6,11 +6,13 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 09:43:36 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/24 11:41:35 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/25 12:32:06 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
+#include "../../parser/inc/parser.h"
+#include "../inc/execution.h"
 
 char* find_and_return_value(t_env *head_ref, char *key)
 {
@@ -31,34 +33,65 @@ char* find_and_return_value(t_env *head_ref, char *key)
     return NULL;
 }
 
-char	**examine(t_tree *head)
-{
-	int		count;
-	t_tree	*current;
-	char	**array;
-	int		i;
+// char	**examine(t_tree_node *head)
+// {
+// 	int		count;
+// 	t_tree_node *current;
+// 	char	**array;
+// 	int		i;
 
-	current = head;
-	count = count_nodes(current);
-	array = (char **)malloc((count + 1) * sizeof(char *));
-	if (array == NULL)
-		return (NULL);
-	i = 0;
-	current = *head;
-	while (current != NULL)
-	{
-		if (ft_strlen(current->token->value) > 0)
-		{
-			array[i] = current->token->value;
-			i++;
-		}
-		current = current->right;
-	}
-	array[i] = NULL;
-	return (array);
+// 	current = head;
+// 	count = count_nodes(current);
+// 	array = (char **)malloc((count + 1) * sizeof(char *));
+// 	if (array == NULL)
+// 		return (NULL);
+// 	i = 0;
+// 	current = head;
+// 	while (current != NULL)
+// 	{
+// 		if (ft_strlen(current->token->value) > 0)
+// 		{
+// 			array[i] = current->token->value;
+// 			i++;
+// 		}
+// 		current = current->right;
+// 	}
+// 	array[i] = NULL;
+// 	return (array);
+// }
+
+char **examine(t_tree_node *head, char *path)
+{
+    int count;
+    t_tree_node *current;
+    char **array;
+    int i;
+
+    current = head;
+    count = count_nodes(current);
+    array = (char **)malloc((count + 2) * sizeof(char *));
+    if (array == NULL)
+        return (NULL);
+
+    // Set the first element to the path
+    array[0] = ft_strdup(path);
+
+    i = 1;
+    current = head;
+    while (current != NULL)
+    {
+        if (ft_strlen(current->token->value) > 0)
+        {
+            array[i] = current->token->value;
+            i++;
+        }
+        current = current->right;
+    }
+    array[i] = NULL;
+    return (array);
 }
 
-int	count_nodes(t_tree *current)
+int	count_nodes(t_tree_node *current)
 {
 	int	count;
 
@@ -113,3 +146,61 @@ char **to_arr(t_env *head)
 
     return array;
 }
+
+void	free_n_set_to_null(char **v)
+{
+	free(*v);
+	*v = NULL;
+}
+
+void	ft_free(char **splitted)
+{
+	int	c;
+
+	c = 0;
+	while (splitted[c])
+	{
+		free(splitted[c]);
+		c++;
+	}
+	free(splitted);
+	return ;
+}
+
+char	*ft_strcpy(char *dest, const char *src)
+{
+	char	*save;
+	int		i;
+
+	save = dest;
+	i = 0;
+	while (src[i] != '\0')
+	{
+		dest[i] = src[i];
+		i++;
+	}
+	dest[i] = '\0';
+	return (save);
+}
+
+char	*ft_strcat(char *dest, const char *src)
+{
+	char	*rdest;
+	int		i;
+
+	rdest = dest;
+	while (*dest)
+	{
+		dest++;
+	}
+	i = 0;
+	while (src[i] != '\0')
+	{
+		dest[i] = src[i];
+		i++;
+	}
+	dest[i] = '\0';
+	return (rdest);
+}
+
+// void dup_them()

@@ -6,43 +6,100 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/24 13:07:05 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/26 10:18:22 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// #include "../../inc/minishell.h"
-#include "../../lexer/inc/lexer.h"
-#include "../../parser/inc/parser.h"
+#include "../../inc/minishell.h"
 #include "../inc/execution.h"
 
-void _execute(t_tree_node *tree, t_env *env)
+int status;
+void	_execute(t_tree_node *tree, t_env *env)
 {
-    if(tree->token->type == TOKEN_WORD){
-        cmd_execute(tree, env);
-        return ;
-    }
-    // else if (tree->token->type == TOKEN_PIPE){
-    //     similar_popen(tree);
-    // }
+	pid_t	pid;
+	int	pfd[2];
+
+	// status = malloc(sizeof(int));
+	if (tree->token->type == TOKEN_WORD)
+	{
+		pid = fork();
+		if (pid == 0)
+			cmd_execute(tree, env);
+		else
+			wait(&status);
+	}
+	else if (tree->token->type == TOKEN_PIPE)
+	{
+		if (pipe(pfd) == -1)
+		{
+			perror("pipe");
+			exit(EXIT_FAILURE);
+		}
+		pid = fork();
+		if (!pid){
+			close(pfd[0]);
+			dup2(pfd[1], STDOUT_FILENO);
+			_execute(tree->left, env);
+			exit(EXIT_SUCCESS);
+		}
+		if (pid)
+			pid = fork();                                                                                                                                            
+		if (!pid){
+			close(pfd[1]);
+			dup2(pfd[0], STDIN_FILENO);
+			_execute(tree->right, env);
+			exit(EXIT_SUCCESS);
+		}
+		close(pfd[0]);
+		close(pfd[1]);
+		wait(&status);
+		wait(&status);
+	}
+	else if (tree->token->type == TOKEN_AND || tree->token->type == TOKEN_OR){
+		// am a create a funct that work for them both and and or
+		// so what i need to do is run the command and then check
+		// if it worked succefully
+		operators_deal(tree, env);
+	}
+}
+void operators_deal(t_tree_node *tree, t_env *env)
+{
+	int exit_status;
+	_execute(tree->left, env);
+	// la lprocess sala normally , meaning mashi bsignal ola shi haja
+	// printf("status: %d\n", status);
+	if (WIFEXITED(status)){
+		exit_status = WEXITSTATUS(status);
+		if (tree->right){
+			if (exit_status == 0 && tree->token->type == TOKEN_AND){
+				_execute(tree->right, env);
+			}
+			else if (exit_status != 0 && tree->token->type == TOKEN_OR){
+				_execute(tree->right, env);
+			}
+		}
+	}
 }
 
-void cmd_execute(t_tree_node *cmd, t_env *envps)
+void	cmd_execute(t_tree_node *cmd, t_env *envps)
 {
-    // printf("cmd: %s\n", cmd->token->value);
-    // printf("args: %s\n", cmd->right->token->value);
-    // i gotta find the path that am a give to execve
-    char **path_dirs = ft_split(find_and_return_value(envps, "PATH"));
-    char *path = find_path(cmd->token->value, path_dirs);
-    if (!path)
-    {
-        perror("command not found");
-        return ;
-    }
-    // then iterate over the tree to get the set of args
-    char **args = examine(cmd->right);
-    char **env = to_arr(envps);
-    execve(path, args, env);
-    perror("command failed")
+	char	**path_dirs;
+	char	*path;
+	char	**args;
+	char	**env;
+
+	// printf("cmd: %s\n", cmd->token->value);
+	// printf("args: %s\n", cmd->right->token->value);
+	// i gotta find the path that am a give to execve
+	path_dirs = ft_split(find_and_return_value(envps, "PATH"), ':');
+	path = find_path(cmd->token->value, path_dirs);
+	if (!path)
+		exit(EXIT_FAILURE);
+	// then iterate over the tree to get the set of args
+	args = examine(cmd->right, path);
+	env = to_arr(envps);
+	execve(path, args, env);
+	perror("command failed");
 }
 
 char	*find_path(char *file, char **arr)
@@ -64,7 +121,7 @@ char	*find_path(char *file, char **arr)
 		ft_strcpy(path_buffer, arr[i]);
 		ft_strcat(path_buffer, "/");
 		ft_strcat(path_buffer, file);
-		ft_strcat(path_buffer, "\0");
+		// ft_strcat(path_buffer, "\0");
 		if (access(path_buffer, X_OK) == 0)
 			return (ft_free(arr), path_buffer);
 		i++;
@@ -73,4 +130,3 @@ char	*find_path(char *file, char **arr)
 		free(path_buffer);
 	return (perror(file), ft_free(arr), NULL);
 }
-
