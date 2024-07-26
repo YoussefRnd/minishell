@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/26 11:38:20 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/26 16:38:05 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,12 +42,6 @@ void	open_redirection_file(t_redirection *redir)
 			close(redir->fd);
 		if (redir->type == TOKEN_HEREDOC)
 		{
-			redir->fd = open("/tmp/heredoc", flags, 0644);
-			if (redir->fd == -1)
-				perror("minishell");
-		}
-		else
-		{
 			redir->fd = open(redir->file, flags, 0644);
 			if (redir->fd == -1)
 				perror("minishell");
@@ -80,7 +74,10 @@ t_redirection	*parse_redirection(t_token **tokens)
 		*tokens = (*tokens)->next;
 	}
 	if (redir->type == TOKEN_HEREDOC)
+	{
 		redir->delimiter = redir->file;
+		redir->file = "/tmp/heredoc";
+	}
 	else
 		redir->delimiter = NULL;
 	open_redirection_file(redir);
