@@ -1,0 +1,150 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
+/*   Updated: 2024/07/26 12:43:09 by hbrahimi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../inc/minishell.h"
+#include "../inc/execution.h"
+
+int status;
+void	_execute(t_tree_node *tree, t_env *env)
+{
+	pid_t	pid;
+	int	pfd[2];
+
+	// status = malloc(sizeof(int));
+	if (tree->token->type == TOKEN_WORD)
+	{
+		pid = fork();
+		if (pid == 0)
+			cmd_execute(tree, env);
+		else
+			wait(&status);
+	}
+	else if (tree->token->type == TOKEN_PIPE)
+	{
+		if (pipe(pfd) == -1)
+		{
+			perror("pipe");
+			exit(EXIT_FAILURE);
+		}
+		pid = fork();
+		if (!pid){
+			close(pfd[0]);
+			dup2(pfd[1], STDOUT_FILENO);
+			_execute(tree->left, env);
+			exit(EXIT_SUCCESS);
+		}
+		if (pid)
+			pid = fork();                                                                                                                                            
+		if (!pid){
+			close(pfd[1]);
+			dup2(pfd[0], STDIN_FILENO);
+			_execute(tree->right, env);
+			exit(EXIT_SUCCESS);
+		}
+		close(pfd[0]);
+		close(pfd[1]);
+		wait(&status);
+		wait(&status);
+	}
+	else if (tree->token->type == TOKEN_AND || tree->token->type == TOKEN_OR){
+		// am a create a funct that work for them both and and or
+		// so what i need to do is run the command and then check
+		// if it worked succefully
+		operators_deal(tree, env);
+	}
+	else if (tree->token->type == TOKEN_SUBSHELL){
+		pid = fork();
+		if (!pid)
+			_execute(tree->left, env);
+		else
+			wait(&status);
+	}
+	else if (tree->token->type == TOKEN_ENV)
+	{
+		char *value = get_value(env, tree->token->value);
+		free(tree->token->value);
+		tree->token->value = ft_strdup(value);
+		// printf("%s\n", tree->token->value);
+		printf("inside of token env case");
+		tree->token->type = TOKEN_WORD;
+		_execute(tree, env);
+	}
+}
+
+void operators_deal(t_tree_node *tree, t_env *env)
+{
+	int exit_status;
+	_execute(tree->left, env);
+	// la lprocess sala normally , meaning mashi bsignal ola shi haja
+	// printf("status: %d\n", status);
+	if (WIFEXITED(status)){
+		exit_status = WEXITSTATUS(status);
+		if (tree->right){
+			if (exit_status == 0 && tree->token->type == TOKEN_AND){
+				_execute(tree->right, env);
+			}
+			else if (exit_status != 0 && tree->token->type == TOKEN_OR){
+				_execute(tree->right, env);
+			}
+		}
+	}
+}
+
+void	cmd_execute(t_tree_node *cmd, t_env *envps)
+{
+	char	**path_dirs;
+	char	*path;
+	char	**args;
+	char	**env;
+
+	// printf("cmd: %s\n", cmd->token->value);
+	// printf("args: %s\n", cmd->right->token->value);
+	// i gotta find the path that am a give to execve
+	path_dirs = ft_split(find_and_return_value(envps, "PATH"), ':');
+	path = find_path(cmd->token->value, path_dirs);
+	if (!path)
+		exit(EXIT_FAILURE);
+	// then iterate over the tree to get the set of args
+	args = examine(cmd->right, path);
+	env = to_arr(envps);
+	execve(path, args, env);
+	perror("command failed");
+}
+
+char	*find_path(char *file, char **arr)
+{
+	int		i;
+	char	*path_buffer;
+
+	if (!arr || !*arr)
+		exit(EXIT_FAILURE);
+	i = 0;
+	path_buffer = NULL;
+	while (arr[i])
+	{
+		if (access(file, X_OK | F_OK) == 0)
+			return (ft_free(arr), ft_strdup(file));
+		if (path_buffer)
+			free_n_set_to_null(&path_buffer);
+		path_buffer = malloc(ft_strlen(arr[i]) + ft_strlen(file) + 2);
+		ft_strcpy(path_buffer, arr[i]);
+		ft_strcat(path_buffer, "/");
+		ft_strcat(path_buffer, file);
+		// ft_strcat(path_buffer, "\0");
+		if (access(path_buffer, X_OK) == 0)
+			return (ft_free(arr), path_buffer);
+		i++;
+	}
+	if (path_buffer)
+		free(path_buffer);
+	return (perror(file), ft_free(arr), NULL);
+}

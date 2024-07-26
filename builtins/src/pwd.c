@@ -1,31 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strlen.c                                        :+:      :+:    :+:   */
+/*   pwd.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yboumlak <yboumlak@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/12/06 17:28:13 by yboumlak          #+#    #+#             */
-/*   Updated: 2023/12/10 23:49:22 by yboumlak         ###   ########.fr       */
+/*   Created: 2024/07/19 11:37:25 by hbrahimi          #+#    #+#             */
+/*   Updated: 2024/07/19 11:43:20 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../../inc/minishell.h"
+#include "../inc/builtins.h"
 
-size_t	ft_strlen(const char *s)
+void	respond_to_pwd(void)
 {
-	size_t	i;
-
-	i = 0;
-	while (s[i] != '\0')
+	char cwd[1024];
+	if (getcwd(cwd, sizeof(cwd)) != NULL)
 	{
-		i++;
+		printf("%s\n", cwd);
 	}
-	return (i);
+	else
+	{
+		perror("getcwd() error");
+	}
 }
-/*
-int	main(void)
-{
-	printf("%zu", ft_strlen("Youssef"));
-}
-*/
+
+// int main()
+// {
+// 	respond_to_pwd();
+// }

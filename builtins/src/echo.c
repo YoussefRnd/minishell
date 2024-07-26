@@ -1,25 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_putchar_fd.c                                    :+:      :+:    :+:   */
+/*   echo.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/12/14 19:45:10 by yboumlak          #+#    #+#             */
-/*   Updated: 2023/12/22 17:14:15 by yboumlak         ###   ########.fr       */
+/*   Created: 2024/07/19 10:37:11 by hbrahimi          #+#    #+#             */
+/*   Updated: 2024/07/23 11:13:11 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../../inc/minishell.h"
+#include "../inc/builtins.h"
 
-void	ft_putchar_fd(char c, int fd)
+void respond_to_echo(char *str, bool flag)
 {
-	write(fd, &c, 1);
+    if (flag)
+        printf("%s, str");
+    else
+        printf("%s\n");
 }
-/* 
-int	main(void)
-{
-	ft_putchar_fd('y', 1);
-	return (0);
-}
- */
