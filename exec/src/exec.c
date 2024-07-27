@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/26 16:37:49 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/27 16:43:44 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ void	_execute(t_tree_node *tree, t_env *env)
 			exit(EXIT_FAILURE);
 		}
 		pid = fork();
+		
 		if (!pid){
 			close(pfd[0]);
 			dup2(pfd[1], STDOUT_FILENO);
@@ -72,7 +73,7 @@ void	_execute(t_tree_node *tree, t_env *env)
 	}
 	// else if (tree->token->type == TOKEN_HEREDOC || tree->token->type == TOKEN_REDIR_OUT)
 	// {
-	// 	printf("fd :[%d]\n", tree->redirections->fd);
+	// 	// printf("fd :[%d]\n", tree->redirections->fd);
 	// 	dup2(tree->redirections->fd, STDOUT_FILENO);
 	// 	_execute(tree, env);
 	// }
@@ -137,7 +138,7 @@ void	cmd_execute(t_tree_node *cmd, t_env *envps)
 				dup2(current->fd, STDIN_FILENO);
 			else if (current->type == TOKEN_HEREDOC){
 				char *line;
-                while ((line = readline("")) != NULL)
+                while ((line = readline("> ")) != NULL)
                 {
 					// printf("line :[%s]\n", line);
 					// printf("delimiter: [%s]\n", current->delimiter);
@@ -148,12 +149,14 @@ void	cmd_execute(t_tree_node *cmd, t_env *envps)
                         break;
                     }
 					write(current->fd, line, ft_strlen(line));
+					write(current->fd, "\n", 1);
                     free(line);
                 }
 				close(current->fd);
 				// printf("%s\n", current->file);
 				int fd = open("/tmp/heredoc", O_RDONLY);
 				dup2(fd, STDIN_FILENO);
+				unlink("/tmp/heredoc");
 				// close(fd);
 			}
 			current = current->next;
@@ -168,6 +171,7 @@ void	cmd_execute(t_tree_node *cmd, t_env *envps)
 	env = to_arr(envps);
 	execve(path, args, env);
 	perror("command failed");
+	exit(EXIT_FAILURE);
 }
 
 char	*find_path(char *file, char **arr)
@@ -189,7 +193,6 @@ char	*find_path(char *file, char **arr)
 		ft_strcpy(path_buffer, arr[i]);
 		ft_strcat(path_buffer, "/");
 		ft_strcat(path_buffer, file);
-		// ft_strcat(path_buffer, "\0");
 		if (access(path_buffer, X_OK) == 0)
 			return (ft_free(arr), path_buffer);
 		i++;
