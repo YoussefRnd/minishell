@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/27 16:43:44 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/27 17:19:05 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,27 +71,17 @@ void	_execute(t_tree_node *tree, t_env *env)
 		else
 			wait(&status);
 	}
-	// else if (tree->token->type == TOKEN_HEREDOC || tree->token->type == TOKEN_REDIR_OUT)
-	// {
-	// 	// printf("fd :[%d]\n", tree->redirections->fd);
-	// 	dup2(tree->redirections->fd, STDOUT_FILENO);
-	// 	_execute(tree, env);
-	// }
-	else
-	{
-		printf("%u\n", tree->token->type);
-	}
 	// TO WORK ON LATER 7ITASH HAD L9LAWI M3NKSH
-	// else if (tree->token->type == TOKEN_ENV)
-	// {
-	// 	char *value = get_value(env, tree->token->value);
-	// 	free(tree->token->value);
-	// 	tree->token->value = ft_strdup(value);
-	// 	// printf("%s\n", tree->token->value);
-	// 	printf("inside of token env case\n");
-	// 	tree->token->type = TOKEN_WORD;
-	// 	_execute(tree, env);
-	// }
+	else if (tree->token->type == TOKEN_ENV)
+	{
+		char *value = get_value(env, tree->token->value);
+		free(tree->token->value);
+		tree->token->value = ft_strdup(value);
+		// printf("%s\n", tree->token->value);
+		printf("inside of token env case\n");
+		tree->token->type = TOKEN_WORD;
+		_execute(tree, env);
+	}
 }
 
 void operators_deal(t_tree_node *tree, t_env *env)
@@ -167,7 +157,8 @@ void	cmd_execute(t_tree_node *cmd, t_env *envps)
 	if (!path)
 		exit(EXIT_FAILURE);
 	// then iterate over the tree to get the set of args
-	args = examine(cmd->right, path);
+	// tr9i3a ta yji wnswlo 3la fin kaystory envs left ola right
+	args = examine(cmd->right, path, envps);
 	env = to_arr(envps);
 	execve(path, args, env);
 	perror("command failed");
