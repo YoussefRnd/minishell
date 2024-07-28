@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/26 12:41:00 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/28 15:59:04 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ t_token	*get_next_token(char **input)
 		if (ft_strlen(value) == 1)
 			return (create_token(TOKEN_WORD, value, state));
 		else if (ft_strlen(value) == 2)
-			return (create_token(TOKEN_OR, value, state));
+			return (create_token(TOKEN_AND, value, state));
 		else
 		{
 			error("minishell: syntax error near unexpected token", value);
