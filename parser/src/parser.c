@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/26 16:38:05 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/29 09:32:00 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,31 @@ void	open_redirection_file(t_redirection *redir)
 	{
 		if (redir->fd != -1)
 			close(redir->fd);
-		if (redir->type == TOKEN_HEREDOC)
+		redir->fd = open(redir->file, flags, 0644);
+		if (redir->fd == -1)
+			perror("open");
+	}
+}
+
+void here_doc(t_redirection *redir)
+{
+	char	*line;
+	char	*tmp;
+
+	while (1)
+	{
+		line = readline("> ");
+		if (!line)
+			break ;
+		if (ft_strcmp(line, redir->delimiter) == 0)
 		{
-			redir->fd = open(redir->file, flags, 0644);
-			if (redir->fd == -1)
-				perror("minishell");
+			free(line);
+			break ;
 		}
+		tmp = ft_strjoin(line, "\n");
+		write(redir->fd, tmp, ft_strlen(tmp));
+		free(tmp);
+		free(line);
 	}
 }
 
@@ -77,10 +96,14 @@ t_redirection	*parse_redirection(t_token **tokens)
 	{
 		redir->delimiter = redir->file;
 		redir->file = "/tmp/heredoc";
+		open_redirection_file(redir);
+		here_doc(redir);
 	}
 	else
+	{
 		redir->delimiter = NULL;
-	open_redirection_file(redir);
+		open_redirection_file(redir);
+	}
 	return (redir);
 }
 

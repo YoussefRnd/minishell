@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/28 15:59:04 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/29 09:49:13 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,10 @@ t_token	*get_next_token(char **input)
 	value = NULL;
 	if (**input == '\0')
 		return (create_token(TOKEN_EOF, "", state));
-	if (isspace(**input))
+	if (ft_isspace(**input))
 	{
 		start = *input;
-		while (isspace(**input))
+		while (ft_isspace(**input))
 			(*input)++;
 		value = strndup(start, *input - start);
 		return (create_token(TOKEN_WHITESPACE, value, state));
@@ -182,7 +182,7 @@ t_token	*get_next_token(char **input)
 		{
 			(*input)--;
 			start = *input;
-			while (!isspace(**input) && !strchr("<>|&\"\'", **input))
+			while (!ft_isspace(**input) && !strchr("<>|&\"\'", **input))
 				(*input)++;
 			value = strndup(start, *input - start);
 			return (create_token(TOKEN_WORD, value, state));
@@ -213,7 +213,7 @@ t_token	*get_next_token(char **input)
 	else
 	{
 		start = *input;
-		while (!isspace(**input) && !strchr("<>|&\"\'", **input))
+		while (!ft_isspace(**input) && !strchr("<>|&\"\'", **input))
 			(*input)++;
 		value = strndup(start, *input - start);
 		return (create_token(TOKEN_WORD, value, state));

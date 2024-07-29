@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:01:12 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/26 09:36:31 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/29 09:48:29 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define LEXER_H
 
 # include "../../inc/minishell.h"
+# include "../../utils/inc/utils.h"
 
 typedef enum s_token_type
 {

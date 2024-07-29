@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:31:45 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/26 10:18:11 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/29 09:48:49 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define PARSER_H
 
 # include "../../lexer/inc/lexer.h"
+# include "../../utils/inc/utils.h"
 # include <stdbool.h>
 # include <fcntl.h>
 
