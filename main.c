@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:28:24 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/26 12:31:48 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/29 11:00:31 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,13 +28,14 @@ int	main(int argc, char **argv, char **envp)
 		input = readline("minishell$ ");
 		if (!input)
 			return (1);
+		add_history(input);
 		tokens = tokenize(input);
 		if (!tokens)
 			continue ;
 		tree = parse(&tokens);
 		print_tree(tree, "", true);
-		// free_tokens(tokens);
-		// free_tree(tree);
 	}
+	free_tokens(tokens);
+	free_tree(tree);
 	return (0);
 }

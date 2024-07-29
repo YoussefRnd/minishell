@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/29 09:49:13 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/29 11:57:28 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,6 +221,22 @@ t_token	*get_next_token(char **input)
 	return (create_token(TOKEN_UNKNOWN, "", state));
 }
 
+void	free_tokens(t_token *head)
+{
+	t_token	*token;
+	t_token	*next;
+
+	token = head;
+	while (token != NULL)
+	{
+		next = token->next;
+		free(token->value);
+		free_tokens(token->subtokens);
+		free(token);
+		token = next;
+	}
+}
+
 t_token	*tokenize(char *input)
 {
 	t_token	*head;
@@ -233,8 +249,8 @@ t_token	*tokenize(char *input)
 	{
 		if (token->type == TOKEN_ERROR)
 		{
-			// free_tokens(head);
-			// free(token);
+			free_tokens(head);
+			free(token);
 			return (NULL);
 		}
 		if (head == NULL)

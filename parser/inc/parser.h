@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:31:45 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/29 09:48:49 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/29 11:55:33 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 
 # include "../../lexer/inc/lexer.h"
 # include "../../utils/inc/utils.h"
-# include <stdbool.h>
 # include <fcntl.h>
+# include <stdbool.h>
 
 typedef struct s_redirection
 {
@@ -39,5 +39,9 @@ typedef struct s_tree_node
 t_tree_node					*parse(t_token **tokens);
 void						print_tree(t_tree_node *node, char *indent,
 								bool is_last);
+void						free_tree(t_tree_node *node);
+
+void	attach_redirections(t_tree_node *node, t_redirection *redir);
+t_redirection	*parse_redirection(t_token **tokens);
 
 #endif

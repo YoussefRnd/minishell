@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:01:12 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/29 09:48:29 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/29 11:51:00 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,9 +50,10 @@ typedef struct s_token
 	struct s_token	*next;
 	struct s_token	*subtokens;
 	t_quote			state;
-	int				has_error;
 }					t_token;
 
 t_token				*tokenize(char *input);
+void				free_tokens(t_token *head);
+void				error(char *msg, char *token);
 
 #endif
