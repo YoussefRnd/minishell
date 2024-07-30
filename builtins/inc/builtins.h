@@ -13,6 +13,9 @@
 #ifndef BUILTINS_H
 # define BUILTINS_H
 
+#include "../../parser/inc/parser.h"
+#include "../../utils/inc/utils.h"
+
 typedef struct s_env
 {
 	char			*key;
@@ -26,7 +29,8 @@ void				append_node(t_env **head, char *data);
 void				print_list(t_env *head);
 void				find_and_remove(t_env **head_ref, char *key);
 t_env				*create_env_dict(char **env);
-int					ft_strcmp(char *s1, char *s2);
 int					node_exists(t_env **head_ref, char *key);
 void modify_node(t_env **head_ref, char *key, char *new_value);
+int respond_to_env(t_env *the_whole_list);
+int respond_to_b(t_tree_node *cmd, t_env **env);
 #endif

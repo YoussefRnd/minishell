@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 09:49:31 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/16 17:18:09 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/30 10:29:53 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,9 @@ t_env *create_env_dict(char **env)
  * @envp: the 2 array of inherited enviroment variables
  * Return: none
 */
-void respond_to_env(t_env *the_whole_list)
+int respond_to_env(t_env *the_whole_list)
 {
     print_list(the_whole_list);
+    return 1;
     // !!! this to be handled in case of a variable that doesn't conatain a value
 }

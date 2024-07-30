@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 09:43:36 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/27 17:16:47 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/27 18:03:30 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,10 @@ char **examine(t_tree_node *head, char *path, t_env *env)
             if (current->token->type == TOKEN_ENV){
                 char *value = get_value(env, current->token->value);
 		        free(current->token->value);
-		        current->token->value = ft_strdup(value);
+		        if (value)
+                    current->token->value = ft_strdup(value);
+                else
+                    current->token->value = ft_strdup("");
             }
             array[i] = current->token->value;
             i++;

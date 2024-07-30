@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 11:42:38 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/27 17:18:30 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/30 11:09:43 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 // #include "../../lexer/inc/lexer.h"
 #include "../../inc/minishell.h"
 #include "../../parser/inc/parser.h"
+#include "../../builtins/inc/builtins.h"
 // #include "../../parser/inc/parser.h"
 
 void cmd_execute(t_tree_node *cmd, t_env *envps);

@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 09:49:45 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/19 13:21:37 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/30 11:08:56 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,17 +113,17 @@ void print_list(t_env *head)
     }
 }
 
-int	ft_strcmp(char *s1, char *s2)
-{
-	if (!s1 || !s2)
-		return (0);
-	while (*s1 && (*s1 == *s2))
-	{
-		s1++;
-		s2++;
-	}
-	return (*s1 - *s2);
-}
+// int	ft_strcmp(char *s1, char *s2)
+// {
+// 	if (!s1 || !s2)
+// 		return (0);
+// 	while (*s1 && (*s1 == *s2))
+// 	{
+// 		s1++;
+// 		s2++;
+// 	}
+// 	return (*s1 - *s2);
+// }
 
 int node_exists(t_env **head_ref, char *key)
 {
