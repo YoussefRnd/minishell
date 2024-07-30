@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/29 12:10:47 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/29 19:58:55 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,7 +230,7 @@ void	print_tree(t_tree_node *node, char *indent, bool is_last)
 		strcat(new_indent, "│   ");
 	}
 	if (node->token)
-		printf("%s\n", node->token->value);
+		printf("%s %p %p %p\n", node->token->value, node->token->value, node->token, node);
 	else
 		printf("NULL\n");
 	print_redirections(node->redirections, new_indent);
