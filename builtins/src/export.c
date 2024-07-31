@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 12:55:29 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/19 10:21:01 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/30 12:11:33 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ void respond_to_export(t_env **list, char **args)
             append_node(list, *args);
             args++;
         }
-    // i gotta handle failures
+    // we gotta handle failures
 }
 
 // int main(int ac, char **av, char **envp)

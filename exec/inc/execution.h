@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 11:42:38 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/30 11:09:43 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/31 18:27:32 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,8 @@
 #include "../../builtins/inc/builtins.h"
 // #include "../../parser/inc/parser.h"
 
-void cmd_execute(t_tree_node *cmd, t_env *envps);
-void _execute(t_tree_node *tree, t_env *env);
-void cmd_execute(t_tree_node *cmd, t_env *envps);
+void _execute(t_tree_node *tree, t_env **env);
+void cmd_execute(t_tree_node *cmd, t_env **envps);
 char	*find_path(char *file, char **arr);
 char* find_and_return_value(t_env *head_ref, char *key);
 char	**examine(t_tree_node *head, char *path, t_env *env);
@@ -32,7 +31,7 @@ void	ft_free(char **splitted);
 char	*ft_strcpy(char *dest, const char *src);
 char	*ft_strcat(char *dest, const char *src);
 int	count_nodes(t_tree_node *current);
-void operators_deal(t_tree_node *tree, t_env *env);
+void operators_deal(t_tree_node *tree, t_env **env);
 char *get_value(t_env *env, char *key);
 
 #endif

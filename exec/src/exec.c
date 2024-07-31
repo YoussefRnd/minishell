@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/30 11:10:24 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/31 18:29:48 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "../../builtins/inc/builtins.h"
 
 int status;
-void	_execute(t_tree_node *tree, t_env *env)
+void	_execute(t_tree_node *tree, t_env **env)
 {
 	pid_t	pid;
 	int	pfd[2];
@@ -82,7 +82,7 @@ void	_execute(t_tree_node *tree, t_env *env)
 	// TO WORK ON LATER 7ITASH HAD L9LAWI M3NKSH
 	else if (tree->token->type == TOKEN_ENV)
 	{
-		char *value = get_value(env, tree->token->value);
+		char *value = get_value(*env, tree->token->value);
 		if (value){
 		free(tree->token->value);
 		tree->token->value = ft_strdup(value);
@@ -93,10 +93,10 @@ void	_execute(t_tree_node *tree, t_env *env)
 		}
 	}
 	else if (tree->token->type == TOKEN_BUILTIN)
-		respond_to_b(tree, &env);
+		respond_to_b(tree, env);
 }
 
-void operators_deal(t_tree_node *tree, t_env *env)
+void operators_deal(t_tree_node *tree, t_env **env)
 {
 	int exit_status;
 	if (tree->left){
@@ -126,7 +126,7 @@ void operators_deal(t_tree_node *tree, t_env *env)
 	}
 }
 
-void	cmd_execute(t_tree_node *cmd, t_env *envps)
+void	cmd_execute(t_tree_node *cmd, t_env **envps)
 {
 	char	**path_dirs;
 	char	*path;
@@ -171,14 +171,14 @@ void	cmd_execute(t_tree_node *cmd, t_env *envps)
 			current = current->next;
 		}
 	}
-	path_dirs = ft_split(find_and_return_value(envps, "PATH"), ':');
+	path_dirs = ft_split(find_and_return_value(*envps, "PATH"), ':');
 	path = find_path(cmd->token->value, path_dirs);
 	if (!path)
 		exit(EXIT_FAILURE);
 	// then iterate over the tree to get the set of args
 	// tr9i3a ta yji wnswlo 3la fin kaystory envs
-	args = examine(cmd->right, path, envps);
-	env = to_arr(envps);
+	args = examine(cmd->right, path, *envps);
+	env = to_arr(*envps);
 	execve(path, args, env);
 	perror("command failed");
 	exit(EXIT_FAILURE);
