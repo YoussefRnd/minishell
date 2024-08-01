@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/31 18:29:48 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/01 16:32:50 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,8 +92,10 @@ void	_execute(t_tree_node *tree, t_env **env)
 		_execute(tree, env);
 		}
 	}
-	else if (tree->token->type == TOKEN_BUILTIN)
-		respond_to_b(tree, env);
+	else if (tree->token->type == TOKEN_BUILTIN){
+		status = respond_to_b(tree, env);
+		return;
+	}
 }
 
 void operators_deal(t_tree_node *tree, t_env **env)
@@ -172,7 +174,10 @@ void	cmd_execute(t_tree_node *cmd, t_env **envps)
 		}
 	}
 	path_dirs = ft_split(find_and_return_value(*envps, "PATH"), ':');
+	if (!path_dirs)
+		perror("daba nbdlo");
 	path = find_path(cmd->token->value, path_dirs);
+	// printf("cmd: [%s], path: [%s]\n", cmd->token->value, path);
 	if (!path)
 		exit(EXIT_FAILURE);
 	// then iterate over the tree to get the set of args
@@ -195,8 +200,6 @@ char	*find_path(char *file, char **arr)
 	path_buffer = NULL;
 	while (arr[i])
 	{
-		if (access(file, X_OK | F_OK) == 0)
-			return (ft_free(arr), ft_strdup(file));
 		if (path_buffer)
 			free_n_set_to_null(&path_buffer);
 		path_buffer = malloc(ft_strlen(arr[i]) + ft_strlen(file) + 2);
@@ -207,6 +210,8 @@ char	*find_path(char *file, char **arr)
 			return (ft_free(arr), path_buffer);
 		i++;
 	}
+	if (access(file, X_OK | F_OK) == 0)
+		return (ft_free(arr), ft_strdup(file));
 	if (path_buffer)
 		free(path_buffer);
 	return (perror(file), ft_free(arr), NULL);

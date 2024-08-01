@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 17:21:35 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/19 10:25:28 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/01 17:13:59 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,17 +19,19 @@
  * @list: wich is the list that i've talked about
  * @args: the args that should be removed
 */
-void respond_to_unset(t_env **list, char **args)
+int respond_to_unset(t_env **list, t_tree_node *cmd)
 {
     // to be handeled: invalid identifiers
+    char **args = traverse_right_and_collect_values(cmd->right, list);
     if (!args)
-        return ;
+        return 1;
     else
         while (*args)
         {
             find_and_remove(list, *args);
             args++;
-        }       
+        }
+    return 0;       
 }
 
 void find_and_remove(t_env **head_ref, char *key)

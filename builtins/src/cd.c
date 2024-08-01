@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/31 17:45:16 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/31 18:50:14 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/07/31 18:58:33 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ int respond_to_cd(t_tree_node *cmd, t_env **env)
     // first of all check if there is a directory provided
     // if so i gotta provide it through get_value of the home
     // then i'll execute it
-    //
     char *directory;
     if (!cmd){
         directory = get_value(*env, "HOME");

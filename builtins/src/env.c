@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 09:49:31 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/30 10:29:53 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/01 09:48:20 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ t_env *create_env_dict(char **env)
 int respond_to_env(t_env *the_whole_list)
 {
     print_list(the_whole_list);
+    printf("inside of env\n");
     return 1;
     // !!! this to be handled in case of a variable that doesn't conatain a value
 }

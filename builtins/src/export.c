@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 12:55:29 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/30 12:11:33 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/01 17:13:51 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,17 +37,24 @@ void print_list_exp(t_env *list)
  * @args: the args of export
  * Return: none
 */
-void respond_to_export(t_env **list, char **args)
+int respond_to_export(t_env **list, t_tree_node *cmd)
 {
+    char **args = traverse_right_and_collect_values(cmd->right, list);
+    // printf("inside of export\n");
     if (!args)
         print_list_exp(*list);
     else
+    {
         while(*args)
         {
             append_node(list, *args);
             args++;
         }
+    }
+    return (0);
     // we gotta handle failures
+    // change the value if it got the same key
+    // and free up memory
 }
 
 // int main(int ac, char **av, char **envp)

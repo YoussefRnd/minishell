@@ -6,12 +6,13 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 09:49:45 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/31 18:24:50 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/01 17:28:38 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
 #include "../inc/builtins.h"
+#include "../../exec/inc/execution.h"
 
 /**
  * split_it - it will split the string passed to it on half
@@ -48,39 +49,44 @@ char	**split_it(char *str)
 	return (that);
 }
 
-/**
- * @brief Appends a new node to the end of a linked list.
- *
- * This function creates a new node with the given data, initializes it using the node_init function,
- * and appends it to the end of the linked list pointed to by head. If the linked list is empty (i.e., *head is NULL),
- * the new node becomes the head of the list.
- *
- * @param head Double pointer to the head of the linked list. If *head is NULL, the list is empty.
- * @param data Pointer to the data to be stored in the new node. The data is copied into the new node using the node_init function.
- *
- * @return void
- */
-void	append_node(t_env **head, char *data)
-{
-	t_env	*new_node;
-	t_env	*current;
+void free_node(t_env *node) {
+    free(node->value);
+    free(node->key);
+    free(node);
+}
 
-	new_node = malloc(sizeof(t_env));
-	node_init(data, new_node);
-	new_node->next = NULL;
-	if (*head == NULL)
-	{
-		*head = new_node;
-	}
-	else
-	{
-		current = *head;
-		while (current->next != NULL)
-		{
-			current = current->next;
-		}
-		current->next = new_node;
-	}
+int update_node_if_key_matches(t_env *node, t_env *new_node) {
+    if (ft_strcmp(node->key, new_node->key) == 0) {
+        free(node->value);
+        node->value = ft_strdup(new_node->value);
+        free_node(new_node);
+        return 1;
+    }
+    return 0;
+}
+
+void append_node(t_env **head, char *data) {
+    t_env *new_node = malloc(sizeof(t_env));
+    t_env *current;
+
+    node_init(data, new_node);
+    new_node->next = NULL;
+
+    if (*head == NULL) {
+        *head = new_node;
+    } else {
+        current = *head;
+        while (current->next != NULL) {
+            if (update_node_if_key_matches(current, new_node)) {
+                return;
+            }
+            current = current->next;
+        }
+        if (update_node_if_key_matches(current, new_node)) {
+            return;
+        }
+        current->next = new_node;
+    }
 }
 
 /**
@@ -108,22 +114,52 @@ void print_list(t_env *head)
     t_env *current = head;
 
     while (current != NULL) {
-        printf("%s=%s\n", current->key, current->value);
+		if (ft_strlen(current->value) > 0)
+        	printf("%s=%s\n", current->key, current->value);
         current = current->next;
     }
 }
+char **traverse_right_and_collect_values(t_tree_node *root, t_env **env)
+{
+    // First, count the number of nodes in the tree
+    int count = count_nodes(root);
+	if (!count)
+		return NULL;
 
-// int	ft_strcmp(char *s1, char *s2)
-// {
-// 	if (!s1 || !s2)
-// 		return (0);
-// 	while (*s1 && (*s1 == *s2))
-// 	{
-// 		s1++;
-// 		s2++;
-// 	}
-// 	return (*s1 - *s2);
-// }
+    // Allocate the array
+    char **array = malloc((count + 1) * sizeof(char *));
+    if (array == NULL)
+    {
+        perror("Failed to allocate memory");
+        return NULL;
+    }
+
+    // Traverse the tree and collect the values
+    t_tree_node *current = root;
+    int i = 0;
+    while (current != NULL)
+    {
+        if (ft_strlen(current->token->value) > 0)
+        {
+			if (current->token->type == TOKEN_ENV){
+				printf("inside of\n");
+				// TODO check if it's an empty string or if it exists at the first place
+				// TODO also do that later hadshi hamd
+				array[i] = get_value(*env, current->token->value);
+				printf("the key: %s | the value: %s\n", current->token->value, array[i]);
+			}
+            else
+				array[i] = current->token->value;
+            i++;
+        }
+        current = current->right;
+    }
+
+    // Null-terminate the array
+    array[i] = NULL;
+
+    return array;
+}
 
 int node_exists(t_env **head_ref, char *key)
 {
