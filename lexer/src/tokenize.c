@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/29 19:22:12 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/01 11:11:54 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,26 @@
 void	error(char *msg, char *token)
 {
 	printf("%s `%s'\n", msg, token);
+}
+
+t_token_type	is_builtin(char *value)
+{
+	if (!ft_strcmp(value, "echo"))
+		return (TOKEN_BUILTIN);
+	else if (!ft_strcmp(value, "cd"))
+		return (TOKEN_BUILTIN);
+	else if (!ft_strcmp(value, "pwd"))
+		return (TOKEN_BUILTIN);
+	else if (!ft_strcmp(value, "export"))
+		return (TOKEN_BUILTIN);
+	else if (!ft_strcmp(value, "unset"))
+		return (TOKEN_BUILTIN);
+	else if (!ft_strcmp(value, "env"))
+		return (TOKEN_BUILTIN);
+	else if (!ft_strcmp(value, "exit"))
+		return (TOKEN_BUILTIN);
+	else
+		return (TOKEN_WORD);
 }
 
 t_token	*create_token(t_token_type type, char *value, t_quote state)
@@ -51,7 +71,7 @@ t_token	*get_next_token(char **input)
 		start = *input;
 		while (ft_isspace(**input))
 			(*input)++;
-		value = strndup(start, *input - start);
+		value = ft_strndup(start, *input - start);
 		return (create_token(TOKEN_WHITESPACE, value, state));
 	}
 	else if (**input == '|')
@@ -59,7 +79,7 @@ t_token	*get_next_token(char **input)
 		start = *input;
 		while (**input == '|')
 			(*input)++;
-		value = strndup(start, *input - start);
+		value = ft_strndup(start, *input - start);
 		if (ft_strlen(value) == 1)
 			return (create_token(TOKEN_PIPE, value, state));
 		else if (ft_strlen(value) == 2)
@@ -75,7 +95,7 @@ t_token	*get_next_token(char **input)
 		start = *input;
 		while (**input == '<')
 			(*input)++;
-		value = strndup(start, *input - start);
+		value = ft_strndup(start, *input - start);
 		if (ft_strlen(value) == 1)
 			return (create_token(TOKEN_REDIR_IN, value, state));
 		else if (ft_strlen(value) == 2)
@@ -91,7 +111,7 @@ t_token	*get_next_token(char **input)
 		start = *input;
 		while (**input == '>')
 			(*input)++;
-		value = strndup(start, *input - start);
+		value = ft_strndup(start, *input - start);
 		if (ft_strlen(value) == 1)
 			return (create_token(TOKEN_REDIR_OUT, value, state));
 		else if (ft_strlen(value) == 2)
@@ -107,7 +127,7 @@ t_token	*get_next_token(char **input)
 		start = *input;
 		while (**input == '&')
 			(*input)++;
-		value = strndup(start, *input - start);
+		value = ft_strndup(start, *input - start);
 		if (ft_strlen(value) == 1)
 			return (create_token(TOKEN_WORD, value, state));
 		else if (ft_strlen(value) == 2)
@@ -133,7 +153,7 @@ t_token	*get_next_token(char **input)
 		}
 		if (nesting_level == 0)
 		{
-			value = strndup(start, *input - start - 1);
+			value = ft_strndup(start, *input - start - 1);
 			subshell_input = value;
 			subshell_token = create_token(TOKEN_SUBSHELL, value, state);
 			last_token = NULL;
@@ -172,7 +192,7 @@ t_token	*get_next_token(char **input)
 			start = *input;
 			while (ft_isalnum(**input))
 				(*input)++;
-			value = strndup(start, *input - start);
+			value = ft_strndup(start, *input - start);
 			if (state == NORMAL || state == IN_DQUOTES)
 				return (create_token(TOKEN_ENV, value, state));
 			else
@@ -184,7 +204,7 @@ t_token	*get_next_token(char **input)
 			start = *input;
 			while (!ft_isspace(**input) && !strchr("<>|&\"\'", **input))
 				(*input)++;
-			value = strndup(start, *input - start);
+			value = ft_strndup(start, *input - start);
 			return (create_token(TOKEN_WORD, value, state));
 		}
 	}
@@ -201,7 +221,7 @@ t_token	*get_next_token(char **input)
 		{
 			if (**input == quote_type)
 			{
-				value = strndup(start, *input - start);
+				value = ft_strndup(start, *input - start);
 				(*input)++;
 				return (create_token(TOKEN_WORD, value, state));
 			}
@@ -215,8 +235,8 @@ t_token	*get_next_token(char **input)
 		start = *input;
 		while (!ft_isspace(**input) && !strchr("<>|&\"\'", **input))
 			(*input)++;
-		value = strndup(start, *input - start);
-		return (create_token(TOKEN_WORD, value, state));
+		value = ft_strndup(start, *input - start);
+		return (create_token(is_builtin(value), value, state));
 	}
 	return (create_token(TOKEN_UNKNOWN, ft_strdup(""), state));
 }
@@ -233,8 +253,18 @@ t_token	*tokenize(char *input)
 	{
 		if (token->type == TOKEN_ERROR)
 		{
-			// free_tokens(head);
+			free_tokens(head);
 			return (NULL);
+		}
+		if (token->type == TOKEN_REDIR_IN || token->type == TOKEN_REDIR_OUT
+			|| token->type == TOKEN_REDIR_APPEND || token->type == TOKEN_HEREDOC)
+		{
+			if ((token = get_next_token(&input))->type != TOKEN_WORD)
+			{
+				error("minishell: syntax error near unexpected token", "newline");
+				free_tokens(head);
+				return (NULL);
+			}
 		}
 		if (head == NULL)
 			head = token;
@@ -242,7 +272,12 @@ t_token	*tokenize(char *input)
 			tail->next = token;
 		tail = token;
 	}
-	if (tail != NULL)
-		tail->next = token;
+	if (tail->type == TOKEN_AND || tail->type == TOKEN_PIPE
+		|| tail->type == TOKEN_OR)
+	{
+		error("minishell: syntax error near unexpected token", tail->value);
+		free_tokens(&head);
+		return (NULL);
+	}
 	return (head);
 }

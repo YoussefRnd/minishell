@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:31:45 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/29 19:48:19 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/30 12:45:09 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ typedef struct s_tree_node
 	struct s_tree_node		*left;
 	struct s_tree_node		*right;
 	t_redirection			*redirections;
-	char					**args;
 }							t_tree_node;
 
 t_tree_node					*parse(t_token **tokens);

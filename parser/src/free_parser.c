@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 14:11:11 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/29 19:54:34 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/07/31 19:51:24 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,71 @@ void	free_redirections(t_redirection **redirection)
 	{
 		current = *redirection;
 		next = current->next;
-		free(current->file);
-		free(current->delimiter);
-		free(current);
+		if (current->file != NULL)
+		{
+			free(current->file);
+			current->file = NULL;
+		}
+		if (current->delimiter != NULL)
+		{
+			free(current->delimiter);
+			current->delimiter = NULL;
+		}
 		*redirection = next;
+		if (current != NULL)
+		{
+			free(current);
+			current = NULL;
+		}
 	}
 	*redirection = NULL;
+}
+
+void free_token(t_token **token)
+{
+	if (*token == NULL)
+		return ;
+	if ((*token)->subtokens != NULL)
+	{
+		free_tokens(&(*token)->subtokens);
+		(*token)->subtokens = NULL;
+	}
+	if ((*token)->value != NULL)
+	{
+		free((*token)->value);
+		(*token)->value = NULL;
+	}
+	free(*token);
+	*token = NULL;
+}
+
+void	free_tokens(t_token **tokens)
+{
+	t_token	*next;
+	t_token	*current;
+
+	while (*tokens)
+	{
+		current = *tokens;
+		next = current->next;
+		if (current->subtokens != NULL)
+		{
+			free_tokens(&current->subtokens);
+			current->subtokens = NULL;
+		}
+		if (current->value != NULL)
+		{
+			free(current->value);
+			current->value = NULL;
+		}
+		*tokens = next;
+		if (current != NULL)
+		{
+			free(current);
+			current = NULL;
+		}
+	}
+	*tokens = NULL;
 }
 
 void	free_tree(t_tree_node **node)
@@ -34,8 +93,19 @@ void	free_tree(t_tree_node **node)
 	if (*node == NULL)
 		return ;
 	free_tree(&(*node)->left);
+	(*node)->left = NULL;
 	free_tree(&(*node)->right);
-	free_redirections(&(*node)->redirections);
-	free_tokens(&(*node)->token);
+	(*node)->right = NULL;
+	if ((*node)->redirections != NULL)
+	{
+		free_redirections(&(*node)->redirections);
+		(*node)->redirections = NULL;
+	}
+	if ((*node)->token != NULL)
+	{
+		free_token(&(*node)->token);
+		(*node)->token = NULL;
+	}
+	free(*node);
 	*node = NULL;
 }

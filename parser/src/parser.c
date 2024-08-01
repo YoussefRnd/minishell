@@ -6,18 +6,41 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/29 19:58:55 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/01 11:13:29 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/parser.h"
+
+t_token	*copy_token(t_token *original)
+{
+	t_token	*copy;
+
+	copy = malloc(sizeof(t_token));
+	if (copy == NULL)
+		return (NULL);
+	copy->type = original->type;
+	copy->value = ft_strdup(original->value);
+	if (copy->value == NULL)
+	{
+		free(copy);
+		return (NULL);
+	}
+	copy->next = NULL;
+	copy->subtokens = NULL;
+	copy->state = original->state;
+	return (copy);
+}
 
 t_tree_node	*create_tree_node(t_token *token)
 {
 	t_tree_node	*node;
 
 	node = malloc(sizeof(t_tree_node));
-	node->token = token;
+	if (token != NULL)
+		node->token = copy_token(token);
+	else
+		node->token = NULL;
 	node->left = NULL;
 	node->right = NULL;
 	node->redirections = NULL;
@@ -63,7 +86,8 @@ t_tree_node	*parse_command(t_token **tokens)
 			|| (*tokens)->type == TOKEN_REDIR_APPEND
 			|| (*tokens)->type == TOKEN_HEREDOC || (*tokens)->type == TOKEN_ENV
 			|| (*tokens)->type == TOKEN_SPECIAL_VAR
-			|| (*tokens)->type == TOKEN_ERROR))
+			|| (*tokens)->type == TOKEN_ERROR
+			|| (*tokens)->type == TOKEN_BUILTIN))
 	{
 		if ((*tokens)->type == TOKEN_WHITESPACE)
 		{
@@ -230,7 +254,7 @@ void	print_tree(t_tree_node *node, char *indent, bool is_last)
 		strcat(new_indent, "│   ");
 	}
 	if (node->token)
-		printf("%s %p %p %p\n", node->token->value, node->token->value, node->token, node);
+		printf("%s\n", node->token->value);
 	else
 		printf("NULL\n");
 	print_redirections(node->redirections, new_indent);
