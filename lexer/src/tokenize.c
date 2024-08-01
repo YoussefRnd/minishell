@@ -252,7 +252,7 @@ t_token	*tokenize(char *input)
 	while (1)
 	{
 		token = get_next_token(&input);
-		if (token == NULL || token->type == TOKEN_EOF)
+		if (token == NULL)
 			break ;
 		if (token->type == TOKEN_ERROR)
 		{
@@ -277,6 +277,8 @@ t_token	*tokenize(char *input)
 		else
 			tail->next = token;
 		tail = token;
+		if (token->type == TOKEN_EOF)
+			break ;
 	}
 	if (tail && (tail->type == TOKEN_AND || tail->type == TOKEN_PIPE
 			|| tail->type == TOKEN_OR))

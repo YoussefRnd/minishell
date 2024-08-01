@@ -35,10 +35,11 @@ int	main(int argc, char **argv, char **envp)
 			free(input);
 			continue ;
 		}
+		t_token *head = tokens;
 		tree = parse(&tokens);
 		print_tree(tree, "", true);
+		free_tokens(&head);
 		free_tree(&tree);
-		free_tokens(&tokens);
 		free(input);
 	}
 	return (0);

@@ -78,16 +78,8 @@ t_tree_node	*parse_command(t_token **tokens)
 	current = NULL;
 	subshell_node = NULL;
 	redirections = NULL;
-	while (*tokens && ((*tokens)->type == TOKEN_WORD
-			|| (*tokens)->type == TOKEN_WHITESPACE
-			|| (*tokens)->type == TOKEN_SUBSHELL
-			|| (*tokens)->type == TOKEN_REDIR_IN
-			|| (*tokens)->type == TOKEN_REDIR_OUT
-			|| (*tokens)->type == TOKEN_REDIR_APPEND
-			|| (*tokens)->type == TOKEN_HEREDOC || (*tokens)->type == TOKEN_ENV
-			|| (*tokens)->type == TOKEN_SPECIAL_VAR
-			|| (*tokens)->type == TOKEN_ERROR
-			|| (*tokens)->type == TOKEN_BUILTIN))
+	while (*tokens && ((*tokens)->type != TOKEN_EOF && (*tokens)->type != TOKEN_PIPE
+			&& (*tokens)->type != TOKEN_AND && (*tokens)->type != TOKEN_OR))
 	{
 		if ((*tokens)->type == TOKEN_WHITESPACE)
 		{

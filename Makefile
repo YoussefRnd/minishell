@@ -28,7 +28,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 $(NAME): $(LIBFT_LIB) $(OBJS)
 	@echo "Building $@..."
-	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS) -L$(LIBFT) -lft
+	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS) -L$(LIBFT) -lft -lreadline
 	@echo "$@ is ready!"
 
 clean:
