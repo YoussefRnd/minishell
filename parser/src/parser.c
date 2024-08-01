@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/01 11:13:29 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/01 12:12:37 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,9 @@ t_tree_node	*parse_command(t_token **tokens)
 			}
 			continue ;
 		}
-		if ((*tokens)->type == TOKEN_WORD)
+		if ((*tokens)->type == TOKEN_WORD || (*tokens)->type == TOKEN_ENV
+			|| (*tokens)->type == TOKEN_SPECIAL_VAR
+			|| (*tokens)->type == TOKEN_ERROR || (*tokens)->type == TOKEN_BUILTIN)
 		{
 			while ((*tokens)->next && (*tokens)->next->type == TOKEN_WORD)
 			{

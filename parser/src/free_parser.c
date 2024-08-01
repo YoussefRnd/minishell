@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 14:11:11 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/31 19:51:24 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/01 11:27:13 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,8 @@ void	free_tokens(t_token **tokens)
 	t_token	*next;
 	t_token	*current;
 
+	if (*tokens == NULL)
+		return ;
 	while (*tokens)
 	{
 		current = *tokens;

@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:28:24 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/01 11:12:36 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/01 11:32:36 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,8 @@ int	main(int argc, char **argv, char **envp)
 		}
 		tree = parse(&tokens);
 		print_tree(tree, "", true);
-		// free_tree(&tree);
-		// free_tokens(&tokens);
+		free_tree(&tree);
+		free_tokens(&tokens);
 		free(input);
 	}
 	return (0);
