@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/31 17:45:16 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/07/31 18:58:33 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/02 18:36:23 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,11 @@ int respond_to_cd(t_tree_node *cmd, t_env **env)
             return (-1);
         }
     }
-    else
-        directory = cmd->token->value;
+    else{
+        char **args = traverse_right_and_collect_values(cmd, env, false);
+        // printf("here\n");
+        directory = args[0];
+    }
     if (chdir(directory)){
         perror("cd failed");
         return (-1);

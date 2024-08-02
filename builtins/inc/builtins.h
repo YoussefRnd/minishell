@@ -34,7 +34,7 @@ void				find_and_remove(t_env **head_ref, char *key);
 t_env				*create_env_dict(char **env);
 int					node_exists(t_env **head_ref, char *key);
 void modify_node(t_env **head_ref, char *key, char *new_value);
-char **traverse_right_and_collect_values(t_tree_node *root, t_env **env);
+char **traverse_right_and_collect_values(t_tree_node *root, t_env **env, bool exp);
 int respond_to_env(t_env *the_whole_list);
 int respond_to_cd(t_tree_node *cmd, t_env **env);
 int respond_to_b(t_tree_node *cmd, t_env **env);

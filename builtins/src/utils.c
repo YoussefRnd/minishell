@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 09:49:45 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/08/01 17:28:38 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/02 18:43:04 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ void print_list(t_env *head)
         current = current->next;
     }
 }
-char **traverse_right_and_collect_values(t_tree_node *root, t_env **env)
+char **traverse_right_and_collect_values(t_tree_node *root, t_env **env, bool exp)
 {
     // First, count the number of nodes in the tree
     int count = count_nodes(root);
@@ -142,11 +142,20 @@ char **traverse_right_and_collect_values(t_tree_node *root, t_env **env)
         if (ft_strlen(current->token->value) > 0)
         {
 			if (current->token->type == TOKEN_ENV){
-				printf("inside of\n");
+				printf("expanding inside of a builtin\n");
 				// TODO check if it's an empty string or if it exists at the first place
-				// TODO also do that later hadshi hamd
-				array[i] = get_value(*env, current->token->value);
-				printf("the key: %s | the value: %s\n", current->token->value, array[i]);
+                char **splitted = split_it(current->token->value);
+				if (!exp)
+                    array[i] = get_value(*env, splitted[0]);
+                else{
+                    char *this = ft_strjoin(get_value(*env, splitted[0]), "=");
+                    array[i] = ft_strjoin(this, splitted[1]);
+                    free(this);
+                }
+				printf("splitted[0]: %s | splitted[1]: %s | array[i]: %s\n", splitted[0], splitted[1], array[i]);
+                free(splitted[0]);
+                free(splitted[1]);
+                free(splitted);
 			}
             else
 				array[i] = current->token->value;
@@ -167,7 +176,7 @@ int node_exists(t_env **head_ref, char *key)
 
     while (current != NULL)
     {
-        if (strcmp(current->key, key) == 0)
+        if (ft_strcmp(current->key, key) == 0)
         {
             return 1; // Node exists
         }
@@ -181,7 +190,7 @@ void modify_node(t_env **head_ref, char *key, char *new_value)
 
     while (current != NULL)
     {
-        if (strcmp(current->key, key) == 0)
+        if (ft_strcmp(current->key, key) == 0)
         {
             free(current->value); // Free the old value
             current->value = strdup(new_value); // Assign the new value

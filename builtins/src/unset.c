@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 17:21:35 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/08/01 17:13:59 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/02 18:36:47 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 int respond_to_unset(t_env **list, t_tree_node *cmd)
 {
     // to be handeled: invalid identifiers
-    char **args = traverse_right_and_collect_values(cmd->right, list);
+    char **args = traverse_right_and_collect_values(cmd->right, list, false);
     if (!args)
         return 1;
     else
@@ -40,7 +40,7 @@ void find_and_remove(t_env **head_ref, char *key)
     t_env* previous = NULL;
 
     // Check if the key is in the head node
-    if (current != NULL && strcmp(current->key, key) == 0)
+    if (current != NULL && ft_strcmp(current->key, key) == 0)
     {
         *head_ref = current->next; // Change head
         free(current->key); // Free key
@@ -50,7 +50,7 @@ void find_and_remove(t_env **head_ref, char *key)
     }
 
     // Search for the key
-    while (current != NULL && strcmp(current->key, key) != 0)
+    while (current != NULL && ft_strcmp(current->key, key) != 0)
     {
         previous = current;
         current = current->next;
