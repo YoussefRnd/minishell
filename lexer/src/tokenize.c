@@ -165,6 +165,7 @@ t_token	*get_next_token(char **input)
 					last_token->next = token;
 				last_token = token;
 			}
+			
 			return (subshell_token);
 		}
 		else
@@ -246,9 +247,11 @@ t_token	*tokenize(char *input)
 	t_token	*head;
 	t_token	*tail;
 	t_token	*token;
+	t_token	*last;
 
 	head = NULL;
 	tail = NULL;
+	last = NULL;
 	while (1)
 	{
 		token = get_next_token(&input);
@@ -259,19 +262,8 @@ t_token	*tokenize(char *input)
 			free_tokens(&head);
 			return (NULL);
 		}
-		if (token->type == TOKEN_REDIR_IN || token->type == TOKEN_REDIR_OUT
-			|| token->type == TOKEN_REDIR_APPEND
-			|| token->type == TOKEN_HEREDOC)
-		{
-			token = get_next_token(&input);
-			if (token == NULL || token->type != TOKEN_WORD)
-			{
-				error("minishell: syntax error near unexpected token",
-					"newline");
-				free_tokens(&head);
-				return (NULL);
-			}
-		}
+		if (token->type != TOKEN_WHITESPACE && token->type != TOKEN_EOF)
+			last = token;
 		if (head == NULL)
 			head = token;
 		else
@@ -280,10 +272,10 @@ t_token	*tokenize(char *input)
 		if (token->type == TOKEN_EOF)
 			break ;
 	}
-	if (tail && (tail->type == TOKEN_AND || tail->type == TOKEN_PIPE
-			|| tail->type == TOKEN_OR))
+	if (last && (last->type == TOKEN_AND || last->type == TOKEN_PIPE
+			|| last->type == TOKEN_OR))
 	{
-		error("minishell: syntax error near unexpected token", tail->value);
+		error("minishell: syntax error near unexpected token", last->value);
 		free_tokens(&head);
 		return (NULL);
 	}

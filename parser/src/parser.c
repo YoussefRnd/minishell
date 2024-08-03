@@ -107,6 +107,11 @@ t_tree_node	*parse_command(t_token **tokens)
 			|| (*tokens)->type == TOKEN_HEREDOC)
 		{
 			new_redir = parse_redirection(tokens);
+			if (new_redir == NULL)
+			{
+				free_tree(&node);
+				return (NULL);
+			}
 			if (redirections == NULL)
 				redirections = new_redir;
 			else

@@ -72,25 +72,28 @@ t_redirection	*parse_redirection(t_token **tokens)
 		file_token = file_token->next;
 	if (file_token && file_token->type == TOKEN_WORD)
 	{
-		redir->file = strdup(file_token->value);
+		redir->file = ft_strdup(file_token->value);
 		*tokens = file_token->next;
+
+		if (redir->type == TOKEN_HEREDOC)
+		{
+			redir->delimiter = redir->file;
+			redir->file = "/tmp/heredoc";
+			open_redirection_file(redir);
+			here_doc(redir);
+		}
+		else
+		{
+			redir->delimiter = NULL;
+			open_redirection_file(redir);
+		}
 	}
 	else
 	{
-		redir->file = NULL;
-		*tokens = (*tokens)->next;
-	}
-	if (redir->type == TOKEN_HEREDOC)
-	{
-		redir->delimiter = redir->file;
-		redir->file = "/tmp/heredoc";
-		open_redirection_file(redir);
-		here_doc(redir);
-	}
-	else
-	{
-		redir->delimiter = NULL;
-		open_redirection_file(redir);
+		error("syntax error near unexpected token", "newline");
+		free(redir);
+		redir = NULL;
+		return (NULL);
 	}
 	return (redir);
 }
