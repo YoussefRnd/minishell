@@ -157,15 +157,17 @@ t_token	*get_next_token(char **input)
 			subshell_input = value;
 			subshell_token = create_token(TOKEN_SUBSHELL, value, state);
 			last_token = NULL;
-			while ((token = get_next_token(&subshell_input))->type != TOKEN_EOF)
+			while (true)
 			{
+				token = get_next_token(&subshell_input);
 				if (last_token == NULL)
 					subshell_token->subtokens = token;
 				else
 					last_token->next = token;
 				last_token = token;
+				if (token->type == TOKEN_EOF)
+					break;
 			}
-			
 			return (subshell_token);
 		}
 		else
@@ -218,13 +220,43 @@ t_token	*get_next_token(char **input)
 			state = IN_QUOTES;
 		(*input)++;
 		start = *input;
+		t_token *temp_token = NULL;
 		while (**input != '\0')
 		{
+			if (**input == '$' && state == IN_DQUOTES)
+			{
+				(*input)++;
+				if (**input == '?')
+				{
+					(*input)++;
+					temp_token = create_token(TOKEN_SPECIAL_VAR, ft_strdup("?"), state);
+				}
+				else if (ft_isalnum(**input))
+				{
+					start = *input;
+					while (ft_isalnum(**input))
+						(*input)++;
+					value = ft_strndup(start, *input - start);
+					temp_token = create_token(TOKEN_ENV, value, state);
+				}
+				else
+				{
+					(*input)--;
+					start = *input;
+					while (!ft_isspace(**input) && !strchr("<>|&\"\'", **input))
+						(*input)++;
+					value = ft_strndup(start, *input - start);
+					temp_token = create_token(TOKEN_WORD, value, state);
+				}
+			}
 			if (**input == quote_type)
 			{
 				value = ft_strndup(start, *input - start);
 				(*input)++;
-				return (create_token(TOKEN_WORD, value, state));
+				if (temp_token != NULL)
+					return temp_token;
+				else
+					return create_token(TOKEN_WORD, value, state);
 			}
 			(*input)++;
 		}
