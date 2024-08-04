@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 14:11:11 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/01 11:27:13 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/03 19:33:02 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	free_redirections(t_redirection **redirection)
 	{
 		current = *redirection;
 		next = current->next;
-		if (current->file != NULL)
+		if (current->file != NULL && current->type != TOKEN_HEREDOC)
 		{
 			free(current->file);
 			current->file = NULL;
@@ -39,55 +39,6 @@ void	free_redirections(t_redirection **redirection)
 		}
 	}
 	*redirection = NULL;
-}
-
-void free_token(t_token **token)
-{
-	if (*token == NULL)
-		return ;
-	if ((*token)->subtokens != NULL)
-	{
-		free_tokens(&(*token)->subtokens);
-		(*token)->subtokens = NULL;
-	}
-	if ((*token)->value != NULL)
-	{
-		free((*token)->value);
-		(*token)->value = NULL;
-	}
-	free(*token);
-	*token = NULL;
-}
-
-void	free_tokens(t_token **tokens)
-{
-	t_token	*next;
-	t_token	*current;
-
-	if (*tokens == NULL)
-		return ;
-	while (*tokens)
-	{
-		current = *tokens;
-		next = current->next;
-		if (current->subtokens != NULL)
-		{
-			free_tokens(&current->subtokens);
-			current->subtokens = NULL;
-		}
-		if (current->value != NULL)
-		{
-			free(current->value);
-			current->value = NULL;
-		}
-		*tokens = next;
-		if (current != NULL)
-		{
-			free(current);
-			current = NULL;
-		}
-	}
-	*tokens = NULL;
 }
 
 void	free_tree(t_tree_node **node)

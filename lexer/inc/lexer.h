@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:01:12 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/31 19:35:30 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/03 19:28:08 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ typedef struct s_token
 }					t_token;
 
 t_token				*tokenize(char *input);
+t_token				*get_next_token(char **input);
 void				free_tokens(t_token **head);
 void				free_token(t_token **token);
 void				error(char *msg, char *token);
