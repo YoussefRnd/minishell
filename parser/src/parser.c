@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/04 13:23:32 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/04 19:24:26 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,89 @@ t_token	*copy_token(t_token *original)
 	copy->subtokens = NULL;
 	copy->state = original->state;
 	return (copy);
+}
+
+bool	match_pattern(char *pattern, char *str)
+{
+	if (*pattern == '\0' && *str == '\0')
+		return (true);
+	if (*pattern == '*' && *(pattern + 1) != '\0' && *str == '\0')
+		return (false);
+	if (*pattern == *str)
+		return (match_pattern(pattern + 1, str + 1));
+	if (*pattern == '*')
+		return (match_pattern(pattern + 1, str) || match_pattern(pattern, str
+				+ 1));
+	return (false);
+}
+
+char	**expand_wildcard(char *pattern)
+{
+	DIR				*dir;
+	struct dirent	*entry;
+	char			**matches;
+	int				size;
+	int				i;
+
+	size = 10;
+	matches = malloc(sizeof(char *) * size);
+	if (matches == NULL)
+	{
+		perror("malloc");
+		return (NULL);
+	}
+	dir = opendir(".");
+	if (dir == NULL)
+	{
+		perror("opendir");
+		return (NULL);
+	}
+	entry = readdir(dir);
+	i = 0;
+	while (entry != NULL)
+	{
+		if (match_pattern(pattern, entry->d_name))
+		{
+			if (i >= size)
+			{
+				size *= 2;
+				matches = ft_realloc(matches, sizeof(char *) * size);
+				if (matches == NULL)
+				{
+					perror("malloc");
+					closedir(dir);
+					return (NULL);
+				}
+			}
+			matches[i] = ft_strdup(entry->d_name);
+			if (matches[i] == NULL)
+			{
+				perror("malloc");
+				free_array(matches);
+				closedir(dir);
+				return (NULL);
+			}
+			i++;
+		}
+		entry = readdir(dir);
+	}
+	closedir(dir);
+	if (i == 0)
+	{
+		free(matches);
+		matches = NULL;
+	}
+	else
+	{
+		matches = ft_realloc(matches, sizeof(char *) * (i + 1));
+		if (matches == NULL)
+		{
+			perror("malloc");
+			return (NULL);
+		}
+		matches[i] = NULL;
+	}
+	return (matches);
 }
 
 t_tree_node	*create_tree_node(t_token *token)
@@ -73,13 +156,17 @@ t_tree_node	*parse_command(t_token **tokens)
 	t_token			*next;
 	t_redirection	*new_redir;
 	t_redirection	*last_redir;
+	char			**matches;
+	t_token			*new_token;
+	int				i;
 
 	node = NULL;
 	current = NULL;
 	subshell_node = NULL;
 	redirections = NULL;
-	while (*tokens && ((*tokens)->type != TOKEN_EOF && (*tokens)->type != TOKEN_PIPE
-			&& (*tokens)->type != TOKEN_AND && (*tokens)->type != TOKEN_OR))
+	while (*tokens && ((*tokens)->type != TOKEN_EOF
+			&& (*tokens)->type != TOKEN_PIPE && (*tokens)->type != TOKEN_AND
+			&& (*tokens)->type != TOKEN_OR))
 	{
 		if ((*tokens)->type == TOKEN_WHITESPACE)
 		{
@@ -125,7 +212,9 @@ t_tree_node	*parse_command(t_token **tokens)
 		}
 		if ((*tokens)->type == TOKEN_WORD || (*tokens)->type == TOKEN_ENV
 			|| (*tokens)->type == TOKEN_SPECIAL_VAR
-			|| (*tokens)->type == TOKEN_ERROR || (*tokens)->type == TOKEN_BUILTIN)
+			|| (*tokens)->type == TOKEN_ERROR
+			|| (*tokens)->type == TOKEN_BUILTIN
+			|| (*tokens)->type == TOKEN_WILDCARD)
 		{
 			while ((*tokens)->next && (*tokens)->next->type == TOKEN_WORD)
 			{
@@ -135,6 +224,39 @@ t_tree_node	*parse_command(t_token **tokens)
 				next = (*tokens)->next;
 				(*tokens)->next = next->next;
 				free(next);
+			}
+		}
+		if ((*tokens)->type == TOKEN_WILDCARD)
+		{
+			matches = expand_wildcard((*tokens)->value);
+			if (matches)
+			{
+				i = 0;
+				while (matches[i])
+				{
+					new_token = create_token(TOKEN_WORD, ft_strdup(matches[i]),
+							NORMAL);
+					if (new_token == NULL)
+					{
+						free_array(matches);
+						free_tree(&node);
+						return (NULL);
+					}
+					if (node == NULL)
+					{
+						node = create_tree_node(new_token);
+						current = node;
+					}
+					else
+					{
+						current->right = create_tree_node(new_token);
+						current = current->right;
+					}
+					i++;
+				}
+				free_array(matches);
+				*tokens = (*tokens)->next;
+				continue ;
 			}
 		}
 		if (node == NULL)

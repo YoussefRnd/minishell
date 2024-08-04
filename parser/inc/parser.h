@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:31:45 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/30 12:45:09 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/04 15:09:03 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include "../../lexer/inc/lexer.h"
 # include "../../utils/inc/utils.h"
+# include <dirent.h>
 # include <fcntl.h>
 # include <stdbool.h>
 

@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/13 11:00:07 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/29 11:56:58 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/04 19:41:04 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,10 @@ int	ft_strcmp(const char *s1, const char *s2)
 	return ((unsigned char)*s1 - (unsigned char)*s2);
 }
 
-char *ft_strndup(char *str, int n)
+char	*ft_strndup(char *str, int n)
 {
-	char *new_str;
-	int i;
+	char	*new_str;
+	int		i;
 
 	new_str = malloc(n + 1);
 	if (!new_str)
@@ -46,4 +46,30 @@ char *ft_strndup(char *str, int n)
 	}
 	new_str[i] = '\0';
 	return (new_str);
+}
+
+void	*ft_realloc(void *ptr, size_t size)
+{
+	void	*new_ptr;
+
+	new_ptr = malloc(size);
+	if (!new_ptr)
+		return (NULL);
+	ft_memcpy(new_ptr, ptr, size);
+	free(ptr);
+	return (new_ptr);
+}
+
+void	free_array(char **array)
+{
+	int	i;
+
+	i = 0;
+	while (array[i])
+	{
+		free(array[i]);
+		i++;
+	}
+	free(array);
+	array = NULL;
 }
