@@ -210,17 +210,18 @@ t_tree_node	*parse_command(t_token **tokens)
 			}
 			continue ;
 		}
-		if ((*tokens)->type == TOKEN_WORD || (*tokens)->type == TOKEN_ENV
-			|| (*tokens)->type == TOKEN_SPECIAL_VAR
+		if ((*tokens)->type == TOKEN_WORD
 			|| (*tokens)->type == TOKEN_ERROR
 			|| (*tokens)->type == TOKEN_BUILTIN
 			|| (*tokens)->type == TOKEN_WILDCARD)
 		{
-			while ((*tokens)->next && (*tokens)->next->type == TOKEN_WORD)
+			while ((*tokens)->next && ((*tokens)->next->type == TOKEN_WORD || (*tokens)->next->type == TOKEN_WILDCARD))
 			{
 				value = ft_strjoin((*tokens)->value, (*tokens)->next->value);
 				free((*tokens)->value);
 				(*tokens)->value = value;
+				if ((*tokens)->next->type == TOKEN_WILDCARD)
+					(*tokens)->type = TOKEN_WILDCARD;
 				next = (*tokens)->next;
 				(*tokens)->next = next->next;
 				free(next);
