@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/03 19:28:22 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/04 13:23:14 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,13 +208,16 @@ t_token	*handle_dollar(char **input, t_quote state)
 
 t_token	*handle_quote(char **input, t_quote *state)
 {
+	t_token	*temp_token;
 	char	quote_type;
 	char	*start;
-	t_token	*temp_token;
 	char	*value;
 
 	quote_type = **input;
-	*state = (**input == '"') ? IN_DQUOTES : IN_QUOTES;
+	if (**input == '\"')
+		*state = IN_DQUOTES;
+	else
+		*state = IN_QUOTES;
 	(*input)++;
 	start = *input;
 	temp_token = NULL;
@@ -222,16 +225,39 @@ t_token	*handle_quote(char **input, t_quote *state)
 	{
 		if (**input == '$' && *state == IN_DQUOTES)
 		{
-			(*input)--;
-			temp_token = handle_dollar(input, *state);
-			if (temp_token != NULL)
-				return (temp_token);
+			(*input)++;
+			if (**input == '?')
+			{
+				(*input)++;
+				temp_token = create_token(TOKEN_SPECIAL_VAR, ft_strdup("?"),
+						*state);
+			}
+			else if (ft_isalnum(**input))
+			{
+				start = *input;
+				while (ft_isalnum(**input))
+					(*input)++;
+				value = ft_strndup(start, *input - start);
+				temp_token = create_token(TOKEN_ENV, value, *state);
+			}
+			else
+			{
+				(*input)--;
+				start = *input;
+				while (!ft_isspace(**input) && !strchr("<>|&\"\'", **input))
+					(*input)++;
+				value = ft_strndup(start, *input - start);
+				temp_token = create_token(TOKEN_WORD, value, *state);
+			}
 		}
 		if (**input == quote_type)
 		{
 			value = ft_strndup(start, *input - start);
 			(*input)++;
-			return (create_token(TOKEN_WORD, value, *state));
+			if (temp_token != NULL)
+				return (temp_token);
+			else
+				return (create_token(TOKEN_WORD, value, *state));
 		}
 		(*input)++;
 	}
@@ -248,6 +274,8 @@ t_token	*handle_default(char **input, t_quote state)
 	while (!ft_isspace(**input) && !strchr("<>|&\"\'", **input))
 		(*input)++;
 	value = ft_strndup(start, *input - start);
+	if (ft_strchr(value, '*'))
+		return (create_token(TOKEN_WILDCARD, value, state));
 	return (create_token(is_builtin(value), value, state));
 }
 
@@ -277,10 +305,10 @@ t_token	*get_next_token(char **input)
 	else if (**input == '$')
 		return (handle_dollar(input, state));
 	else if (**input == '\'' || **input == '"')
-		return handle_quote(input, &state);
+		return (handle_quote(input, &state));
 	else
-		return handle_default(input, state);
-	return create_token(TOKEN_UNKNOWN, ft_strdup(""), state);
+		return (handle_default(input, state));
+	return (create_token(TOKEN_UNKNOWN, ft_strdup(""), state));
 }
 
 t_token	*tokenize(char *input)

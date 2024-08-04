@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:01:12 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/03 19:28:08 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/04 12:38:25 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ typedef enum s_token_type
 	TOKEN_ENV,
 	TOKEN_SPECIAL_VAR,
 	TOKEN_BUILTIN,
+	TOKEN_WILDCARD,
 	TOKEN_EOF,
 	TOKEN_UNKNOWN,
 	TOKEN_ERROR
