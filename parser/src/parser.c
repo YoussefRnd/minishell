@@ -276,12 +276,7 @@ t_tree_node	*parse_command(t_token **tokens)
 		}
 		*tokens = (*tokens)->next;
 	}
-	if (!node && redirections)
-	{
-		node = create_tree_node(NULL);
-		attach_redirections(node, redirections);
-	}
-	else if (node && redirections)
+	if (node && redirections)
 		attach_redirections(node, redirections);
 	return (node);
 }

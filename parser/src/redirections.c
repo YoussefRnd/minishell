@@ -102,6 +102,8 @@ void	attach_redirections(t_tree_node *node, t_redirection *redir)
 {
 	t_redirection	*current;
 
+	if (!node || !redir)
+		return ;
 	if (!node->redirections)
 		node->redirections = redir;
 	else
