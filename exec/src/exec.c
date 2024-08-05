@@ -6,30 +6,41 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/08/01 16:32:50 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/05 22:40:23 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "../../builtins/inc/builtins.h"
 #include "../../inc/minishell.h"
 #include "../inc/execution.h"
-#include "../../builtins/inc/builtins.h"
 
-int status;
+// TODO check why it stopped working when i call it again
+// TODO protect forking
 void	_execute(t_tree_node *tree, t_env **env)
 {
 	pid_t	pid;
-	int	pfd[2];
+	int status1;
+	int status2;
+	int		pfd[2];
+	char	*value;
+
 	if (!tree)
 		return ;
-
-	// status = malloc(sizeof(int));
 	if (tree->token->type == TOKEN_WORD)
 	{
+		signal(SIGINT, SIG_IGN);
 		pid = fork();
 		if (pid == 0)
+		{
+			signal_handler_in_c();
 			cmd_execute(tree, env);
+		}
 		else
+		{
 			wait(&status);
+			handle_exit_status(status);
+			// ? idk maybe i gotta add + 128
+		}
 	}
 	else if (tree->token->type == TOKEN_PIPE)
 	{
@@ -39,40 +50,34 @@ void	_execute(t_tree_node *tree, t_env **env)
 			exit(EXIT_FAILURE);
 		}
 		pid = fork();
-		
-		if (!pid){
+		if (!pid)
+		{
 			close(pfd[0]);
 			dup2(pfd[1], STDOUT_FILENO);
 			_execute(tree->left, env);
 			exit(EXIT_SUCCESS);
 		}
 		if (pid)
-			pid = fork();                                                                                                                                            
-		if (!pid){
+			pid = fork();
+		if (!pid)
+		{
 			close(pfd[1]);
 			dup2(pfd[0], STDIN_FILENO);
 			_execute(tree->right, env);
+			
 			exit(EXIT_SUCCESS);
 		}
 		close(pfd[0]);
 		close(pfd[1]);
-		// to change
-		wait(&status);
-		wait(&status);
+		//TODO to change
+		wait(&status1);
+		wait(&status2);
+		handle_exit_status(status2);
 	}
-	// i think the tokenezation got fucked up
-	else if (tree->token->type == TOKEN_AND || tree->token->type == TOKEN_OR){
-		// am a create a funct that work for them both and and or
-		// so what i need to do is run the command and then check
-		// if it worked succefully
+	else if (tree->token->type == TOKEN_AND || tree->token->type == TOKEN_OR)
 		operators_deal(tree, env);
-		//  printf("Status after wait: %d\n", status);
-		// if (tree->token->type == TOKEN_AND)
-		// 	printf("we got an and operator\n");
-		// else if (tree->token->type == TOKEN_OR)
-		// 	printf("we got an or operator\n");
-	}
-	else if (tree->token->type == TOKEN_SUBSHELL){
+	else if (tree->token->type == TOKEN_SUBSHELL)
+	{
 		pid = fork();
 		if (!pid)
 			_execute(tree->left, env);
@@ -82,48 +87,39 @@ void	_execute(t_tree_node *tree, t_env **env)
 	// TO WORK ON LATER 7ITASH HAD L9LAWI M3NKSH
 	else if (tree->token->type == TOKEN_ENV)
 	{
-		char *value = get_value(*env, tree->token->value);
-		if (value){
-		free(tree->token->value);
-		tree->token->value = ft_strdup(value);
-		// printf("%s\n", tree->token->value);
-		// printf("inside of token env case\n");
-		tree->token->type = TOKEN_WORD;
-		_execute(tree, env);
+		value = get_value(*env, tree->token->value);
+		if (value)
+		{
+			free(tree->token->value);
+			tree->token->value = ft_strdup(value);
+			tree->token->type = TOKEN_WORD;
+			_execute(tree, env);
 		}
 	}
-	else if (tree->token->type == TOKEN_BUILTIN){
+	else if (tree->token->type == TOKEN_BUILTIN)
+	{
 		status = respond_to_b(tree, env);
-		return;
+		return ;
 	}
 }
 
-void operators_deal(t_tree_node *tree, t_env **env)
+void	operators_deal(t_tree_node *tree, t_env **env)
 {
-	int exit_status;
-	if (tree->left){
+	int	exit_status;
+
+	if (tree->left)
 		_execute(tree->left, env);
-		// return ;
-		// exit(EXIT_SUCCESS);
-	}
 	else
 		return ;
-	// la lprocess sala normally , meaning mashi bsignal ola shi haja
-	if (WIFEXITED(status)){
+	if (WIFEXITED(status))
+	{
 		exit_status = WEXITSTATUS(status);
-		// printf("WIFEXITED: %d\n", WIFEXITED(status));
-    	// printf("WEXITSTATUS: %d\n", WEXITSTATUS(status));
-		if (tree->right){
-				// printf("exit_status: %d\n", exit_status);
-			if (exit_status == 0 && tree->token->type == TOKEN_AND){
-				// printf("insid of and\n");
+		if (tree->right)
+		{
+			if (exit_status == 0 && tree->token->type == TOKEN_AND)
 				_execute(tree->right, env);
-			}
-			else if (exit_status != 0 && tree->token->type == TOKEN_OR){
-				// printf("token type: %u\n", tree->token->type);
-				// printf("insid of or\n");
+			else if (exit_status != 0 && tree->token->type == TOKEN_OR)
 				_execute(tree->right, env);
-			}
 		}
 	}
 }
@@ -134,57 +130,49 @@ void	cmd_execute(t_tree_node *cmd, t_env **envps)
 	char	*path;
 	char	**args;
 	char	**env;
+	t_redirection *current;
+	int		fd;
 
-	// printf("cmd: %s\n", cmd->token->value);
-	// printf("args: %s\n", cmd->right->token->value);
-	// i gotta find the path that am a give to execve
 	if (cmd->redirections)
 	{
-		t_redirection *current;
 		current = cmd->redirections;
-		while(current)
+		while (current)
 		{
-			if (current->type == TOKEN_REDIR_OUT || current->type == TOKEN_REDIR_APPEND){
+			if (current->type == TOKEN_REDIR_OUT
+				|| current->type == TOKEN_REDIR_APPEND)
+			{
+				if (current->fd == -1)
+					exit(EXIT_FAILURE);
 				dup2(current->fd, STDOUT_FILENO);
 			}
 			else if (current->type == TOKEN_REDIR_IN)
+			{
+				if (current->fd == -1)
+					exit(EXIT_FAILURE);
 				dup2(current->fd, STDIN_FILENO);
-			else if (current->type == TOKEN_HEREDOC){
-				char *line;
-                while ((line = readline("> ")) != NULL)
-                {
-					// printf("line :[%s]\n", line);
-					// printf("delimiter: [%s]\n", current->delimiter);
-                    if (ft_strcmp(line, current->delimiter) == 0)
-                    {
-                        free(line);
-						// printf("shi l3iba\n");
-                        break;
-                    }
-                    free(line);
-                }
-				close(current->fd);
-				// printf("%s\n", current->file);
-				int fd = open("/tmp/heredoc", O_RDONLY);
+			}
+			else if (current->type == TOKEN_HEREDOC)
+			{
+				fd = open(current->file, O_RDONLY);
+				if (fd == -1){
+					perror("Herdoc");
+					exit(EXIT_FAILURE);
+				}
 				dup2(fd, STDIN_FILENO);
-				unlink("/tmp/heredoc");
-				// close(fd);
+				unlink(current->file);
+				close(fd);
 			}
 			current = current->next;
 		}
 	}
 	path_dirs = ft_split(find_and_return_value(*envps, "PATH"), ':');
-	if (!path_dirs)
-		perror("daba nbdlo");
 	path = find_path(cmd->token->value, path_dirs);
-	// printf("cmd: [%s], path: [%s]\n", cmd->token->value, path);
 	if (!path)
-		exit(EXIT_FAILURE);
-	// then iterate over the tree to get the set of args
+		exit(127);
 	// tr9i3a ta yji wnswlo 3la fin kaystory envs
 	args = examine(cmd->right, path, *envps);
 	env = to_arr(*envps);
-	execve(path, args, env);
+	execve(path, args, NULL);
 	perror("command failed");
 	exit(EXIT_FAILURE);
 }
@@ -194,8 +182,14 @@ char	*find_path(char *file, char **arr)
 	int		i;
 	char	*path_buffer;
 
-	if (!arr || !*arr)
+	// printf("cmd: %s\n", file);
+	if (!arr || !*arr){
+		// TODO i'll make a function for it later
+		if (access(file, X_OK | F_OK) == 0)
+			return (ft_strdup(file));
+		// TODO look at it at the end
 		exit(EXIT_FAILURE);
+	}
 	i = 0;
 	path_buffer = NULL;
 	while (arr[i])
@@ -210,9 +204,9 @@ char	*find_path(char *file, char **arr)
 			return (ft_free(arr), path_buffer);
 		i++;
 	}
-	if (access(file, X_OK | F_OK) == 0)
-		return (ft_free(arr), ft_strdup(file));
 	if (path_buffer)
 		free(path_buffer);
+	if (access(file, X_OK | F_OK) == 0)
+		return (ft_free(arr), ft_strdup(file));
 	return (perror(file), ft_free(arr), NULL);
 }
