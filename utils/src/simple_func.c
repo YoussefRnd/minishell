@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/13 11:00:07 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/04 19:41:04 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/06 15:38:34 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,11 +52,22 @@ void	*ft_realloc(void *ptr, size_t size)
 {
 	void	*new_ptr;
 
+	if (size == 0)
+	{
+		free(ptr);
+		return (NULL);
+	}
 	new_ptr = malloc(size);
 	if (!new_ptr)
+	{
+		free(ptr);
 		return (NULL);
-	ft_memcpy(new_ptr, ptr, size);
-	free(ptr);
+	}
+	if (ptr)
+	{
+		ft_memcpy(new_ptr, ptr, size);
+		free(ptr);
+	}
 	return (new_ptr);
 }
 

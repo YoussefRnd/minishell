@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:01:12 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/04 17:38:26 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/06 11:15:54 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ typedef enum s_token_type
 	TOKEN_SPECIAL_VAR,
 	TOKEN_BUILTIN,
 	TOKEN_WILDCARD,
+	TOKEN_EMPTY,
 	TOKEN_EOF,
 	TOKEN_UNKNOWN,
 	TOKEN_ERROR
@@ -51,6 +52,7 @@ typedef struct s_token
 	struct s_token	*next;
 	struct s_token	*subtokens;
 	t_quote			state;
+	bool			is_atached;
 }					t_token;
 
 t_token				*tokenize(char *input);
@@ -59,6 +61,6 @@ t_token				*create_token(t_token_type type, char *value,
 						t_quote state);
 void				free_tokens(t_token **head);
 void				free_token(t_token **token);
-void				error(char *msg, char *token);
+void				error(char *msg, char *token, int exit_status);
 
 #endif

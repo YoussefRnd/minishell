@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 16:59:08 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/22 14:37:19 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/06 10:00:06 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,5 +21,7 @@
 # include <stdbool.h>
 # include <stdio.h>
 # include <stdlib.h>
+
+int	status;
 
 #endif

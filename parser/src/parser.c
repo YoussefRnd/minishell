@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/04 19:24:26 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/06 15:37:03 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@ bool	match_pattern(char *pattern, char *str)
 {
 	if (*pattern == '\0' && *str == '\0')
 		return (true);
+	if (*pattern == '*' && *str == '.')
+		return (false);
 	if (*pattern == '*' && *(pattern + 1) != '\0' && *str == '\0')
 		return (false);
 	if (*pattern == *str)
@@ -46,11 +48,36 @@ bool	match_pattern(char *pattern, char *str)
 	return (false);
 }
 
+void	sort_array(char **array)
+{
+	int		i;
+	int		j;
+	char	*tmp;
+
+	i = 0;
+	while (array[i])
+	{
+		j = i + 1;
+		while (array[j])
+		{
+			if (ft_strcmp(array[i], array[j]) > 0)
+			{
+				tmp = array[i];
+				array[i] = array[j];
+				array[j] = tmp;
+			}
+			j++;
+		}
+		i++;
+	}
+}
+
 char	**expand_wildcard(char *pattern)
 {
 	DIR				*dir;
 	struct dirent	*entry;
 	char			**matches;
+	char			**new_matches;
 	int				size;
 	int				i;
 
@@ -65,6 +92,7 @@ char	**expand_wildcard(char *pattern)
 	if (dir == NULL)
 	{
 		perror("opendir");
+		free(matches);
 		return (NULL);
 	}
 	entry = readdir(dir);
@@ -76,13 +104,15 @@ char	**expand_wildcard(char *pattern)
 			if (i >= size)
 			{
 				size *= 2;
-				matches = ft_realloc(matches, sizeof(char *) * size);
-				if (matches == NULL)
+				new_matches = ft_realloc(matches, sizeof(char *) * size);
+				if (new_matches == NULL)
 				{
 					perror("malloc");
+					free_array(matches);
 					closedir(dir);
 					return (NULL);
 				}
+				matches = new_matches;
 			}
 			matches[i] = ft_strdup(entry->d_name);
 			if (matches[i] == NULL)
@@ -104,13 +134,16 @@ char	**expand_wildcard(char *pattern)
 	}
 	else
 	{
-		matches = ft_realloc(matches, sizeof(char *) * (i + 1));
-		if (matches == NULL)
+		new_matches = ft_realloc(matches, sizeof(char *) * (i + 1));
+		if (new_matches == NULL)
 		{
 			perror("malloc");
+			free_array(matches);
 			return (NULL);
 		}
+		matches = new_matches;
 		matches[i] = NULL;
+		sort_array(matches);
 	}
 	return (matches);
 }
@@ -168,7 +201,8 @@ t_tree_node	*parse_command(t_token **tokens)
 			&& (*tokens)->type != TOKEN_PIPE && (*tokens)->type != TOKEN_AND
 			&& (*tokens)->type != TOKEN_OR))
 	{
-		if ((*tokens)->type == TOKEN_WHITESPACE)
+		if ((*tokens)->type == TOKEN_WHITESPACE
+			|| (*tokens)->type == TOKEN_EMPTY)
 		{
 			*tokens = (*tokens)->next;
 			continue ;
@@ -210,12 +244,12 @@ t_tree_node	*parse_command(t_token **tokens)
 			}
 			continue ;
 		}
-		if ((*tokens)->type == TOKEN_WORD
-			|| (*tokens)->type == TOKEN_ERROR
+		if ((*tokens)->type == TOKEN_WORD || (*tokens)->type == TOKEN_ERROR
 			|| (*tokens)->type == TOKEN_BUILTIN
 			|| (*tokens)->type == TOKEN_WILDCARD)
 		{
-			while ((*tokens)->next && ((*tokens)->next->type == TOKEN_WORD || (*tokens)->next->type == TOKEN_WILDCARD))
+			while ((*tokens)->next && ((*tokens)->next->type == TOKEN_WORD
+					|| (*tokens)->next->type == TOKEN_WILDCARD))
 			{
 				value = ft_strjoin((*tokens)->value, (*tokens)->next->value);
 				free((*tokens)->value);
@@ -226,6 +260,12 @@ t_tree_node	*parse_command(t_token **tokens)
 				(*tokens)->next = next->next;
 				free(next);
 			}
+		}
+		if (((*tokens)->type == TOKEN_ENV
+				|| (*tokens)->type == TOKEN_SPECIAL_VAR) && (*tokens)->next
+			&& (*tokens)->next->type == TOKEN_WORD)
+		{
+			(*tokens)->is_atached = true;
 		}
 		if ((*tokens)->type == TOKEN_WILDCARD)
 		{
@@ -246,11 +286,26 @@ t_tree_node	*parse_command(t_token **tokens)
 					if (node == NULL)
 					{
 						node = create_tree_node(new_token);
+						free_token(&new_token);
+						if (node == NULL)
+						{
+							free_token(&new_token);
+							free_array(matches);
+							return (NULL);
+						}
 						current = node;
 					}
 					else
 					{
 						current->right = create_tree_node(new_token);
+						free_token(&new_token);
+						if (current->right == NULL)
+						{
+							free_token(&new_token);
+							free_array(matches);
+							free_tree(&node);
+							return (NULL);
+						}
 						current = current->right;
 					}
 					i++;

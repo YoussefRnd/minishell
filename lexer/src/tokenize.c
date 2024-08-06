@@ -6,14 +6,15 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/04 19:35:46 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/06 11:22:33 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/lexer.h"
 
-void	error(char *msg, char *token)
+void	error(char *msg, char *token, int exit_status)
 {
+	status = exit_status;
 	printf("%s `%s'\n", msg, token);
 }
 
@@ -47,6 +48,7 @@ t_token	*create_token(t_token_type type, char *value, t_quote state)
 	token->state = state;
 	token->subtokens = NULL;
 	token->next = NULL;
+	token->is_atached = false;
 	return (token);
 }
 
@@ -77,7 +79,7 @@ t_token	*handle_pipe(char **input, t_quote state)
 		return (create_token(TOKEN_OR, value, state));
 	else
 	{
-		error("minishell: syntax error near unexpected token", value);
+		error("minishell: syntax error near unexpected token", value, 258);
 		return (create_token(TOKEN_ERROR, ft_strdup(""), state));
 	}
 }
@@ -105,7 +107,7 @@ t_token	*handle_redirection(char **input, char redir, t_quote state)
 		else if (ft_strlen(value) == 2)
 			return (create_token(TOKEN_REDIR_APPEND, value, state));
 	}
-	error("minishell: syntax error near unexpected token", value);
+	error("minishell: syntax error near unexpected token", value, 258);
 	return (create_token(TOKEN_ERROR, ft_strdup(""), state));
 }
 
@@ -122,7 +124,7 @@ t_token	*handle_ampersand(char **input, t_quote state)
 		return (create_token(TOKEN_WORD, value, state));
 	else if (ft_strlen(value) == 2)
 		return (create_token(TOKEN_AND, value, state));
-	error("minishell: syntax error near unexpected token", value);
+	error("minishell: syntax error near unexpected token", value, 258);
 	return (create_token(TOKEN_ERROR, ft_strdup(""), state));
 }
 
@@ -150,6 +152,12 @@ t_token	*handle_subshell(char **input, t_quote state)
 	if (nesting_level == 0)
 	{
 		value = ft_strndup(start, *input - start - 1);
+		if (ft_strlen(value) == 0)
+		{
+			error("minishell: syntax error near unexpected token", ")", 258);
+			free(value);
+			return (create_token(TOKEN_ERROR, ft_strdup(""), state));
+		}
 		subshell_input = value;
 		subshell_token = create_token(TOKEN_SUBSHELL, value, state);
 		last_token = NULL;
@@ -168,7 +176,7 @@ t_token	*handle_subshell(char **input, t_quote state)
 	}
 	else
 	{
-		error("minishell: syntax error near unexpected token", *input);
+		error("minishell: syntax error near unexpected token", *input, 1);
 		return (create_token(TOKEN_ERROR, ft_strdup(""), state));
 	}
 }
@@ -254,6 +262,8 @@ t_token	*handle_quote(char **input, t_quote *state)
 		{
 			value = ft_strndup(start, *input - start);
 			(*input)++;
+			if (ft_strlen(value) == 0)
+				return (create_token(TOKEN_EMPTY, value, *state));
 			if (temp_token != NULL)
 				return (temp_token);
 			else
@@ -261,7 +271,7 @@ t_token	*handle_quote(char **input, t_quote *state)
 		}
 		(*input)++;
 	}
-	error("Syntax error: unmatched quote", NULL);
+	error("Syntax error: unmatched quote", NULL, 1);
 	return (create_token(TOKEN_ERROR, ft_strdup(""), *state));
 }
 
@@ -299,7 +309,7 @@ t_token	*get_next_token(char **input)
 	else if (**input == ')')
 	{
 		(*input)++;
-		error("minishell: syntax error near unexpected token", *input);
+		error("minishell: syntax error near unexpected token", *input, 258);
 		return (create_token(TOKEN_ERROR, ft_strdup(""), state));
 	}
 	else if (**input == '$')
@@ -326,6 +336,11 @@ t_token	*tokenize(char *input)
 		token = get_next_token(&input);
 		if (token == NULL)
 			break ;
+		if (head == NULL)
+			head = token;
+		else
+			tail->next = token;
+		tail = token;
 		if (token->type == TOKEN_ERROR)
 		{
 			free_tokens(&head);
@@ -333,18 +348,22 @@ t_token	*tokenize(char *input)
 		}
 		if (token->type != TOKEN_WHITESPACE && token->type != TOKEN_EOF)
 			last = token;
-		if (head == NULL)
-			head = token;
-		else
-			tail->next = token;
-		tail = token;
 		if (token->type == TOKEN_EOF)
 			break ;
+	}
+	if (head && (head->type == TOKEN_AND || head->type == TOKEN_PIPE
+			|| head->type == TOKEN_OR))
+	{
+		error("minishell: syntax error near unexpected token", head->value,
+			258);
+		free_tokens(&head);
+		return (NULL);
 	}
 	if (last && (last->type == TOKEN_AND || last->type == TOKEN_PIPE
 			|| last->type == TOKEN_OR))
 	{
-		error("minishell: syntax error near unexpected token", last->value);
+		error("minishell: syntax error near unexpected token", last->value,
+			1);
 		free_tokens(&head);
 		return (NULL);
 	}

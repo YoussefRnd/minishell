@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 14:12:23 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/29 14:14:44 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/06 11:10:12 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ t_redirection	*parse_redirection(t_token **tokens)
 	}
 	else
 	{
-		error("syntax error near unexpected token", "newline");
+		error("syntax error near unexpected token", "newline", 258);
 		free(redir);
 		redir = NULL;
 		return (NULL);
