@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/06 15:37:03 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/08/06 17:11:11 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ t_token	*copy_token(t_token *original)
 	copy->next = NULL;
 	copy->subtokens = NULL;
 	copy->state = original->state;
+	copy->is_atached = original->is_atached;
 	return (copy);
 }
 
@@ -261,12 +262,6 @@ t_tree_node	*parse_command(t_token **tokens)
 				free(next);
 			}
 		}
-		if (((*tokens)->type == TOKEN_ENV
-				|| (*tokens)->type == TOKEN_SPECIAL_VAR) && (*tokens)->next
-			&& (*tokens)->next->type == TOKEN_WORD)
-		{
-			(*tokens)->is_atached = true;
-		}
 		if ((*tokens)->type == TOKEN_WILDCARD)
 		{
 			matches = expand_wildcard((*tokens)->value);
@@ -314,6 +309,12 @@ t_tree_node	*parse_command(t_token **tokens)
 				*tokens = (*tokens)->next;
 				continue ;
 			}
+		}
+		if (((*tokens)->type == TOKEN_ENV
+				|| (*tokens)->type == TOKEN_SPECIAL_VAR) && (*tokens)->next
+			&& (*tokens)->next->type == TOKEN_WORD)
+		{
+			(*tokens)->is_atached = true;
 		}
 		if (node == NULL)
 		{
@@ -426,7 +427,8 @@ void	print_tree(t_tree_node *node, char *indent, bool is_last)
 		strcat(new_indent, "│   ");
 	}
 	if (node->token)
-		printf("%s\n", node->token->value);
+		printf("%s, %u, %d\n", node->token->value, node->token->type,
+			node->token->is_atached);
 	else
 		printf("NULL\n");
 	print_redirections(node->redirections, new_indent);
