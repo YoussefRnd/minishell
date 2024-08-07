@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/08/05 22:40:23 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/07 01:53:14 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,15 @@
 
 // TODO check why it stopped working when i call it again
 // TODO protect forking
-void	_execute(t_tree_node *tree, t_env **env)
+void	_execute(t_tree_node *tree, t_env **env, bool *forked)
 {
 	pid_t	pid;
-	int status1;
-	int status2;
+	int		substatus;
 	int		pfd[2];
 	char	*value;
 
+	pid_t pidl, pidr = 0;
+	// int status2;
 	if (!tree)
 		return ;
 	if (tree->token->type == TOKEN_WORD)
@@ -38,7 +39,9 @@ void	_execute(t_tree_node *tree, t_env **env)
 		else
 		{
 			wait(&status);
-			handle_exit_status(status);
+			handle_exit_status();
+			if (*forked)
+				exit(status);
 			// ? idk maybe i gotta add + 128
 		}
 	}
@@ -49,40 +52,46 @@ void	_execute(t_tree_node *tree, t_env **env)
 			perror("pipe");
 			exit(EXIT_FAILURE);
 		}
-		pid = fork();
-		if (!pid)
+		*forked = true;
+		signal(SIGINT, SIG_IGN);
+		pidl = fork();
+		if (!pidl)
 		{
 			close(pfd[0]);
 			dup2(pfd[1], STDOUT_FILENO);
-			_execute(tree->left, env);
+			_execute(tree->left, env, forked);
 			exit(EXIT_SUCCESS);
 		}
-		if (pid)
-			pid = fork();
-		if (!pid)
+		if (pidl)
+			pidr = fork();
+		if (!pidr)
 		{
 			close(pfd[1]);
 			dup2(pfd[0], STDIN_FILENO);
-			_execute(tree->right, env);
-			
-			exit(EXIT_SUCCESS);
+			_execute(tree->right, env, forked);
+			exit(status);
 		}
 		close(pfd[0]);
 		close(pfd[1]);
-		//TODO to change
-		wait(&status1);
-		wait(&status2);
-		handle_exit_status(status2);
+		// TODO to change
+		waitpid(pidl, &substatus, 0);
+		waitpid(pidr, &status, 0);
+		handle_exit_status();
 	}
 	else if (tree->token->type == TOKEN_AND || tree->token->type == TOKEN_OR)
-		operators_deal(tree, env);
+		operators_deal(tree, env, forked);
 	else if (tree->token->type == TOKEN_SUBSHELL)
 	{
+		*forked = true;
+		signal(SIGINT, SIG_IGN);
 		pid = fork();
 		if (!pid)
-			_execute(tree->left, env);
+			_execute(tree->left, env, forked);
 		else
+		{
 			wait(&status);
+			handle_exit_status();
+		}
 	}
 	// TO WORK ON LATER 7ITASH HAD L9LAWI M3NKSH
 	else if (tree->token->type == TOKEN_ENV)
@@ -93,7 +102,7 @@ void	_execute(t_tree_node *tree, t_env **env)
 			free(tree->token->value);
 			tree->token->value = ft_strdup(value);
 			tree->token->type = TOKEN_WORD;
-			_execute(tree, env);
+			_execute(tree, env, forked);
 		}
 	}
 	else if (tree->token->type == TOKEN_BUILTIN)
@@ -103,12 +112,12 @@ void	_execute(t_tree_node *tree, t_env **env)
 	}
 }
 
-void	operators_deal(t_tree_node *tree, t_env **env)
+void	operators_deal(t_tree_node *tree, t_env **env, bool *forked)
 {
 	int	exit_status;
 
 	if (tree->left)
-		_execute(tree->left, env);
+		_execute(tree->left, env, forked);
 	else
 		return ;
 	if (WIFEXITED(status))
@@ -117,62 +126,29 @@ void	operators_deal(t_tree_node *tree, t_env **env)
 		if (tree->right)
 		{
 			if (exit_status == 0 && tree->token->type == TOKEN_AND)
-				_execute(tree->right, env);
+				_execute(tree->right, env, forked);
 			else if (exit_status != 0 && tree->token->type == TOKEN_OR)
-				_execute(tree->right, env);
+				_execute(tree->right, env, forked);
 		}
 	}
 }
 
 void	cmd_execute(t_tree_node *cmd, t_env **envps)
 {
-	char	**path_dirs;
-	char	*path;
-	char	**args;
-	char	**env;
-	t_redirection *current;
-	int		fd;
+	char			**path_dirs;
+	char			*path;
+	char			**args;
+	char			**env;
 
 	if (cmd->redirections)
-	{
-		current = cmd->redirections;
-		while (current)
-		{
-			if (current->type == TOKEN_REDIR_OUT
-				|| current->type == TOKEN_REDIR_APPEND)
-			{
-				if (current->fd == -1)
-					exit(EXIT_FAILURE);
-				dup2(current->fd, STDOUT_FILENO);
-			}
-			else if (current->type == TOKEN_REDIR_IN)
-			{
-				if (current->fd == -1)
-					exit(EXIT_FAILURE);
-				dup2(current->fd, STDIN_FILENO);
-			}
-			else if (current->type == TOKEN_HEREDOC)
-			{
-				fd = open(current->file, O_RDONLY);
-				if (fd == -1){
-					perror("Herdoc");
-					exit(EXIT_FAILURE);
-				}
-				dup2(fd, STDIN_FILENO);
-				unlink(current->file);
-				close(fd);
-			}
-			current = current->next;
-		}
-	}
+		handle_redir(cmd->redirections);
 	path_dirs = ft_split(find_and_return_value(*envps, "PATH"), ':');
 	path = find_path(cmd->token->value, path_dirs);
 	if (!path)
 		exit(127);
-	// tr9i3a ta yji wnswlo 3la fin kaystory envs
 	args = examine(cmd->right, path, *envps);
 	env = to_arr(*envps);
-	execve(path, args, NULL);
+	execve(path, args, env);
 	perror("command failed");
 	exit(EXIT_FAILURE);
 }
@@ -183,7 +159,8 @@ char	*find_path(char *file, char **arr)
 	char	*path_buffer;
 
 	// printf("cmd: %s\n", file);
-	if (!arr || !*arr){
+	if (!arr || !*arr)
+	{
 		// TODO i'll make a function for it later
 		if (access(file, X_OK | F_OK) == 0)
 			return (ft_strdup(file));

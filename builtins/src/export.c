@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 12:55:29 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/08/05 23:07:11 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/07 13:19:53 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,15 @@ void print_list_exp(t_env *list)
 
 int respond_to_export(t_env **list, t_tree_node *cmd)
 {
+    int in = dup(STDIN_FILENO);
+	int out = dup(STDOUT_FILENO);
     char **args = traverse_right_and_collect_values(cmd->right, list, true);
     // printf("inside of export\n");
-    if (!args)
+    if (!args){
+        if (cmd->redirections)
+            handle_redir(cmd->redirections);
         print_list_exp(*list);
+    }
     else
     {
         while(*args)
@@ -50,6 +55,8 @@ int respond_to_export(t_env **list, t_tree_node *cmd)
             args++;
         }
     }
+    dup2(in, STDIN_FILENO);
+    dup2(out, STDOUT_FILENO);
     return (0);
     // we gotta handle failures
     // change the value if it got the same key

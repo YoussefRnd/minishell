@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 09:49:45 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/08/05 13:24:37 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/06 19:22:16 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,8 @@ void	append_node(t_env **head, char *data)
 	t_env	*current;
 
 	new_node = malloc(sizeof(t_env));
-	node_init(data, new_node);
+	if (!node_init(data, new_node))
+		return ;
 	new_node->next = NULL;
 	if (*head == NULL)
 	{
@@ -98,20 +99,49 @@ void	append_node(t_env **head, char *data)
 	}
 }
 
+int is_valid_env_var_name(const char *key) {
+    if (key == NULL || *key == '\0') {
+        return 0; // Null or empty string is not a valid key
+    }
+
+    // The first character must be a letter or an underscore
+    if (!isalpha((unsigned char)key[0]) && key[0] != '_') {
+        return 0;
+    }
+
+    // Subsequent characters must be letters, digits, or underscores
+    for (int i = 1; key[i] != '\0'; i++) {
+        if (!isalnum((unsigned char)key[i]) && key[i] != '_') {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 /**
  * node_init - it will fill the right
  * formations of each env var in a node
  * @str: str is supposed to be the whole env variable
  * @node: is a node in the linked list
  */
-void	node_init(char *str, t_env *node)
+int	node_init(char *str, t_env *node)
 {
 	char	**splitted;
 
 	splitted = split_it(str);
-	node->key = splitted[0];
-	node->value = splitted[1];
+	if (is_valid_env_var_name(splitted[0])){
+		node->key = splitted[0];
+		node->value = splitted[1];
+	}
+	else{
+		printf("invalid key\n");
+		free_node(node);
+		return 0;
+	}
+	return 1;
 }
+
 
 /**
  * print_list - as it's name says
@@ -171,8 +201,8 @@ char	**traverse_right_and_collect_values(t_tree_node *root, t_env **env,
 					array[i] = ft_strjoin(this, splitted[1]);
 					free(this);
 				}
-				printf("splitted[0]: %s | splitted[1]: %s | array[i]: %s\n",
-					splitted[0], splitted[1], array[i]);
+				// printf("splitted[0]: %s | splitted[1]: %s | array[i]: %s\n",
+				// 	splitted[0], splitted[1], array[i]);
 				free(splitted[0]);
 				free(splitted[1]);
 				free(splitted);

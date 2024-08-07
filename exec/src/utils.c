@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 09:43:36 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/08/05 22:39:48 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/07 01:48:00 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ char	*find_and_return_value(t_env *head_ref, char *key)
 	return (NULL);
 }
 
+// !!!
 char	*get_value(t_env *env, char *key)
 {
 	t_env	*current;
@@ -198,20 +199,56 @@ char	*ft_strcat(char *dest, const char *src)
 	return (rdest);
 }
 
-void ft_exit(int num)
+void	ft_exit(int num)
 {
 	status = num;
 	exit(EXIT_FAILURE);
 }
 
-void handle_exit_status(int new)
+void	handle_exit_status(void)
 {
 	if (WIFEXITED(status))
 	{
-		status = WEXITSTATUS(new);
+		status = WEXITSTATUS(status);
 	}
-	else if (WIFSIGNALED(new))
+	else if (WIFSIGNALED(status))
 	{
-		status = 128 + WTERMSIG(new);
+		status = 128 + WTERMSIG(status);
+	}
+}
+
+void	handle_redir(t_redirection *current)
+{
+	int fd;
+
+	while (current)
+	{
+		if (current->type == TOKEN_REDIR_OUT
+			|| current->type == TOKEN_REDIR_APPEND)
+		{
+			if (current->fd == -1)
+				exit(EXIT_FAILURE);
+			dup2(current->fd, STDOUT_FILENO);
+
+		}
+		else if (current->type == TOKEN_REDIR_IN)
+		{
+			if (current->fd == -1)
+				exit(EXIT_FAILURE);
+			dup2(current->fd, STDIN_FILENO);
+		}
+		else if (current->type == TOKEN_HEREDOC)
+		{
+			fd = open(current->file, O_RDONLY);
+			if (fd == -1)
+			{
+				perror("Herdoc");
+				exit(EXIT_FAILURE);
+			}
+			dup2(fd, STDIN_FILENO);
+			unlink(current->file);
+			close(fd);
+		}
+		current = current->next;
 	}
 }

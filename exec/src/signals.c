@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 17:04:30 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/08/05 22:08:33 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/08/07 13:14:09 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void	sigint_handler_in_p(int sig_num)
 	// exit(-1);
 	// printf("in parent\n");
 	(void)sig_num;
-	// rl_replace_line("", 0);
+	rl_replace_line("", 0);
 	rl_on_new_line();
 	printf("\n");
 	rl_redisplay();
