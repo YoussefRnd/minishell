@@ -6,287 +6,17 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/06 16:22:50 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/05 13:26:10 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/lexer.h"
 
-void	error(char *msg, char *token, int exit_status)
+t_token	*handle_close_paren(char **input, t_quote state)
 {
-	status = exit_status;
-	printf("%s `%s'\n", msg, token);
-}
-
-t_token_type	is_builtin(char *value)
-{
-	if (!ft_strcmp(value, "echo"))
-		return (TOKEN_BUILTIN);
-	else if (!ft_strcmp(value, "cd"))
-		return (TOKEN_BUILTIN);
-	else if (!ft_strcmp(value, "pwd"))
-		return (TOKEN_BUILTIN);
-	else if (!ft_strcmp(value, "export"))
-		return (TOKEN_BUILTIN);
-	else if (!ft_strcmp(value, "unset"))
-		return (TOKEN_BUILTIN);
-	else if (!ft_strcmp(value, "env"))
-		return (TOKEN_BUILTIN);
-	else if (!ft_strcmp(value, "exit"))
-		return (TOKEN_BUILTIN);
-	else
-		return (TOKEN_WORD);
-}
-
-t_token	*create_token(t_token_type type, char *value, t_quote state)
-{
-	t_token	*token;
-
-	token = malloc(sizeof(t_token));
-	token->type = type;
-	token->value = value;
-	token->state = state;
-	token->subtokens = NULL;
-	token->next = NULL;
-	token->is_atached = false;
-	return (token);
-}
-
-t_token	*handle_whitespace(char **input, t_quote state)
-{
-	char	*start;
-	char	*value;
-
-	start = *input;
-	while (ft_isspace(**input))
-		(*input)++;
-	value = ft_strndup(start, *input - start);
-	return (create_token(TOKEN_WHITESPACE, value, state));
-}
-
-t_token	*handle_pipe(char **input, t_quote state)
-{
-	char	*start;
-	char	*value;
-
-	start = *input;
-	while (**input == '|')
-		(*input)++;
-	value = ft_strndup(start, *input - start);
-	if (ft_strlen(value) == 1)
-		return (create_token(TOKEN_PIPE, value, state));
-	else if (ft_strlen(value) == 2)
-		return (create_token(TOKEN_OR, value, state));
-	else
-	{
-		error("minishell: syntax error near unexpected token", value, 258);
-		return (create_token(TOKEN_ERROR, ft_strdup(""), state));
-	}
-}
-
-t_token	*handle_redirection(char **input, char redir, t_quote state)
-{
-	char	*start;
-	char	*value;
-
-	start = *input;
-	while (**input == redir)
-		(*input)++;
-	value = ft_strndup(start, *input - start);
-	if (redir == '<')
-	{
-		if (ft_strlen(value) == 1)
-			return (create_token(TOKEN_REDIR_IN, value, state));
-		else if (ft_strlen(value) == 2)
-			return (create_token(TOKEN_HEREDOC, value, state));
-	}
-	else if (redir == '>')
-	{
-		if (ft_strlen(value) == 1)
-			return (create_token(TOKEN_REDIR_OUT, value, state));
-		else if (ft_strlen(value) == 2)
-			return (create_token(TOKEN_REDIR_APPEND, value, state));
-	}
-	error("minishell: syntax error near unexpected token", value, 258);
+	(*input)++;
+	error("minishell: syntax error near unexpected token", *input, 258);
 	return (create_token(TOKEN_ERROR, ft_strdup(""), state));
-}
-
-t_token	*handle_ampersand(char **input, t_quote state)
-{
-	char	*start;
-	char	*value;
-
-	start = *input;
-	while (**input == '&')
-		(*input)++;
-	value = ft_strndup(start, *input - start);
-	if (ft_strlen(value) == 1)
-		return (create_token(TOKEN_WORD, value, state));
-	else if (ft_strlen(value) == 2)
-		return (create_token(TOKEN_AND, value, state));
-	error("minishell: syntax error near unexpected token", value, 258);
-	return (create_token(TOKEN_ERROR, ft_strdup(""), state));
-}
-
-t_token	*handle_subshell(char **input, t_quote state)
-{
-	char	*start;
-	int		nesting_level;
-	char	*value;
-	char	*subshell_input;
-	t_token	*subshell_token;
-	t_token	*last_token;
-	t_token	*token;
-
-	(*input)++;
-	start = *input;
-	nesting_level = 1;
-	while (nesting_level > 0 && **input != '\0')
-	{
-		if (**input == '(')
-			nesting_level++;
-		else if (**input == ')')
-			nesting_level--;
-		(*input)++;
-	}
-	if (nesting_level == 0)
-	{
-		value = ft_strndup(start, *input - start - 1);
-		if (ft_strlen(value) == 0)
-		{
-			error("minishell: syntax error near unexpected token", ")", 258);
-			free(value);
-			return (create_token(TOKEN_ERROR, ft_strdup(""), state));
-		}
-		subshell_input = value;
-		subshell_token = create_token(TOKEN_SUBSHELL, value, state);
-		last_token = NULL;
-		while (true)
-		{
-			token = get_next_token(&subshell_input);
-			if (last_token == NULL)
-				subshell_token->subtokens = token;
-			else
-				last_token->next = token;
-			last_token = token;
-			if (token->type == TOKEN_EOF)
-				break ;
-		}
-		return (subshell_token);
-	}
-	else
-	{
-		error("minishell: syntax error near unexpected token", *input, 1);
-		return (create_token(TOKEN_ERROR, ft_strdup(""), state));
-	}
-}
-
-t_token	*handle_dollar(char **input, t_quote state)
-{
-	char	*start;
-	char	*value;
-
-	(*input)++;
-	if (**input == '?')
-	{
-		(*input)++;
-		return (create_token(TOKEN_SPECIAL_VAR, ft_strdup("?"), state));
-	}
-	else if (ft_isalnum(**input))
-	{
-		start = *input;
-		while (ft_isalnum(**input))
-			(*input)++;
-		value = ft_strndup(start, *input - start);
-		if (state == NORMAL || state == IN_DQUOTES)
-			return (create_token(TOKEN_ENV, value, state));
-		else
-			return (create_token(TOKEN_WORD, value, state));
-	}
-	else
-	{
-		(*input)--;
-		start = *input;
-		while (!ft_isspace(**input) && !strchr("<>|&\"\'", **input))
-			(*input)++;
-		value = ft_strndup(start, *input - start);
-		return (create_token(TOKEN_WORD, value, state));
-	}
-}
-
-t_token	*handle_quote(char **input, t_quote *state)
-{
-	t_token	*temp_token;
-	char	quote_type;
-	char	*start;
-	char	*value;
-
-	quote_type = **input;
-	if (**input == '\"')
-		*state = IN_DQUOTES;
-	else
-		*state = IN_QUOTES;
-	(*input)++;
-	start = *input;
-	temp_token = NULL;
-	while (**input != '\0')
-	{
-		if (**input == '$' && *state == IN_DQUOTES)
-		{
-			(*input)++;
-			if (**input == '?')
-			{
-				(*input)++;
-				temp_token = create_token(TOKEN_SPECIAL_VAR, ft_strdup("?"),
-						*state);
-			}
-			else if (ft_isalnum(**input))
-			{
-				start = *input;
-				while (ft_isalnum(**input))
-					(*input)++;
-				value = ft_strndup(start, *input - start);
-				temp_token = create_token(TOKEN_ENV, value, *state);
-			}
-			else
-			{
-				(*input)--;
-				start = *input;
-				while (!ft_isspace(**input) && !strchr("<>|&\"\'", **input))
-					(*input)++;
-				value = ft_strndup(start, *input - start);
-				temp_token = create_token(TOKEN_WORD, value, *state);
-			}
-		}
-		if (**input == quote_type)
-		{
-			value = ft_strndup(start, *input - start);
-			(*input)++;
-			if (ft_strlen(value) == 0)
-				return (create_token(TOKEN_EMPTY, value, *state));
-			if (temp_token != NULL)
-				return (temp_token);
-			else
-				return (create_token(TOKEN_WORD, value, *state));
-		}
-		(*input)++;
-	}
-	error("Syntax error: unmatched quote", NULL, 1);
-	return (create_token(TOKEN_ERROR, ft_strdup(""), *state));
-}
-
-t_token	*handle_default(char **input, t_quote state)
-{
-	char	*start;
-	char	*value;
-
-	start = *input;
-	while (!ft_isspace(**input) && !strchr("<>|&\"\'", **input))
-		(*input)++;
-	value = ft_strndup(start, *input - start);
-	if (ft_strchr(value, '*'))
-		return (create_token(TOKEN_WILDCARD, value, state));
-	return (create_token(is_builtin(value), value, state));
 }
 
 t_token	*get_next_token(char **input)
@@ -307,11 +37,7 @@ t_token	*get_next_token(char **input)
 	else if (**input == '(')
 		return (handle_subshell(input, state));
 	else if (**input == ')')
-	{
-		(*input)++;
-		error("minishell: syntax error near unexpected token", *input, 258);
-		return (create_token(TOKEN_ERROR, ft_strdup(""), state));
-	}
+		return (handle_close_paren(input, state));
 	else if (**input == '$')
 		return (handle_dollar(input, state));
 	else if (**input == '\'' || **input == '"')
@@ -321,36 +47,76 @@ t_token	*get_next_token(char **input)
 	return (create_token(TOKEN_UNKNOWN, ft_strdup(""), state));
 }
 
-t_token	*tokenize(char *input)
-{
-	t_token	*head;
-	t_token	*tail;
-	t_token	*token;
-	t_token	*last;
+// t_token	*tokenize(char *input)
+// {
+// 	t_token	*head;
+// 	t_token	*tail;
+// 	t_token	*token;
+// 	t_token	*last;
 
-	head = NULL;
-	tail = NULL;
-	last = NULL;
-	while (1)
+// 	head = NULL;
+// 	tail = NULL;
+// 	last = NULL;
+// 	while (1)
+// 	{
+// 		token = get_next_token(&input);
+// 		if (token == NULL)
+// 			break ;
+// 		if (head == NULL)
+// 			head = token;
+// 		else
+// 			tail->next = token;
+// 		tail = token;
+// 		if (token->type == TOKEN_ERROR)
+// 		{
+// 			free_tokens(&head);
+// 			return (NULL);
+// 		}
+// 		if (token->type != TOKEN_WHITESPACE && token->type != TOKEN_EOF)
+// 			last = token;
+// 		if (token->type == TOKEN_EOF)
+// 			break ;
+// 	}
+// 	if (head && (head->type == TOKEN_AND || head->type == TOKEN_PIPE
+// 			|| head->type == TOKEN_OR))
+// 	{
+// 		error("minishell: syntax error near unexpected token", head->value,
+// 			258);
+// 		free_tokens(&head);
+// 		return (NULL);
+// 	}
+// 	if (last && (last->type == TOKEN_AND || last->type == TOKEN_PIPE
+// 			|| last->type == TOKEN_OR))
+// 	{
+// 		error("minishell: syntax error near unexpected token", last->value, 1);
+// 		free_tokens(&head);
+// 		return (NULL);
+// 	}
+// 	return (head);
+// }
+
+int	process_token(t_token *token, t_token **head, t_token **tail,
+		t_token **last)
+{
+	if (!token)
+		return (0);
+	if (*head == NULL)
+		*head = token;
+	else
+		(*tail)->next = token;
+	*tail = token;
+	if (token->type == TOKEN_ERROR)
 	{
-		token = get_next_token(&input);
-		if (token == NULL)
-			break ;
-		if (head == NULL)
-			head = token;
-		else
-			tail->next = token;
-		tail = token;
-		if (token->type == TOKEN_ERROR)
-		{
-			free_tokens(&head);
-			return (NULL);
-		}
-		if (token->type != TOKEN_WHITESPACE && token->type != TOKEN_EOF)
-			last = token;
-		if (token->type == TOKEN_EOF)
-			break ;
+		free_tokens(head);
+		return (0);
 	}
+	if (token->type != TOKEN_WHITESPACE && token->type != TOKEN_EOF)
+		*last = token;
+	return (1);
+}
+
+t_token	*check_token_syntax(t_token *head, t_token *last)
+{
 	if (head && (head->type == TOKEN_AND || head->type == TOKEN_PIPE
 			|| head->type == TOKEN_OR))
 	{
@@ -362,10 +128,30 @@ t_token	*tokenize(char *input)
 	if (last && (last->type == TOKEN_AND || last->type == TOKEN_PIPE
 			|| last->type == TOKEN_OR))
 	{
-		error("minishell: syntax error near unexpected token", last->value,
-			1);
+		error("minishell: syntax error near unexpected token", last->value, 1);
 		free_tokens(&head);
 		return (NULL);
 	}
 	return (head);
+}
+
+t_token	*tokenize(char *input)
+{
+	t_token	*head;
+	t_token	*tail;
+	t_token	*last;
+	t_token	*token;
+
+	head = NULL;
+	tail = NULL;
+	last = NULL;
+	while (1)
+	{
+		token = get_next_token(&input);
+		if (!process_token(token, &head, &tail, &last))
+			return (NULL);
+		if (token->type == TOKEN_EOF)
+			break ;
+	}
+	return (check_token_syntax(head, last));
 }

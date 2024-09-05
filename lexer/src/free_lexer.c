@@ -6,13 +6,13 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 19:24:27 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/05 21:53:15 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/05 13:27:50 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/lexer.h"
 
-void free_token(t_token **token)
+void	free_token(t_token **token)
 {
 	if (*token == NULL)
 		return ;
