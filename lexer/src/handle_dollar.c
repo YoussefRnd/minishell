@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 12:42:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/03 18:02:05 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/08 10:41:08 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,20 +20,39 @@ t_token	*handle_special_var(char **input, t_quote state)
 
 t_token	*handle_double_dollar(char **input, t_quote state)
 {
-	char	*start;
-	char	*value;
+    int count = 0;
+    char	*start;
+    char	*value;
 
-	(*input)++;
-	if (ft_isalnum(**input) || **input == '_')
-	{
-		start = *input;
-		while (ft_isalnum(**input) || **input == '_')
-			(*input)++;
-		value = ft_strndup(start, *input - start);
-		return (create_token(TOKEN_WORD, value, state));
-	}
-	return (create_token(TOKEN_EMPTY, ft_strdup("$"), state));
+    while (**input == '$')
+    {
+        count++;
+        (*input)++;
+    }
+
+    if(count % 2 == 0)
+    {
+        start = *input;
+        while (ft_isalnum(**input) || **input == '_')
+            (*input)++;
+        value = ft_strndup(start, *input - start);
+        return (create_token(TOKEN_WORD, value, state));
+    }
+    else if (count % 2 != 0)
+    {
+        if (ft_isalnum(**input) || **input == '_')
+        {
+            start = *input;
+            while (ft_isalnum(**input) || **input == '_')
+                (*input)++;
+            value = ft_strndup(start, *input - start);
+            return (create_token(TOKEN_ENV, value, state));
+        }
+    }
+
+    return (create_token(TOKEN_EMPTY, ft_strdup(""), state));
 }
+
 
 t_token	*handle_env_var(char **input, t_quote state)
 {
@@ -68,7 +87,10 @@ t_token	*handle_dollar(char **input, t_quote state)
 	if (**input == '?')
 		return (handle_special_var(input, state));
 	if (**input == '$')
+	{
+		(*input)--;
 		return (handle_double_dollar(input, state));
+	}
 	if (ft_isalnum(**input) || **input == '_')
 		return (handle_env_var(input, state));
 	return (handle_non_alnum(input, state));
