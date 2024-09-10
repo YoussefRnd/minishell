@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/10 11:20:10 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/10 15:15:48 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -339,26 +339,22 @@ t_tree_node	*parse_subshell(t_token **tokens)
 // 	return (node);
 // }
 
-int	is_control_operator(t_token_type type)
+int	is_valid_token(t_token *tokens)
 {
-	return (type == TOKEN_EOF || type == TOKEN_PIPE || type == TOKEN_AND
-		|| type == TOKEN_OR);
+	return (tokens && ((tokens)->type != TOKEN_EOF
+			&& (tokens)->type != TOKEN_PIPE && (tokens)->type != TOKEN_AND
+			&& (tokens)->type != TOKEN_OR));
 }
 
-int	attach_env_variable(t_token **tokens)
+int	is_env_vars_attached(t_token *tokens)
 {
-	if (((*tokens)->type == TOKEN_ENV && (*tokens)->next
-			&& (*tokens)->next->type != TOKEN_WHITESPACE
-			&& (*tokens)->next->type != TOKEN_EOF) || ((*tokens)->next
-			&& (*tokens)->next->type == TOKEN_ENV))
-	{
-		(*tokens)->is_atached = true;
-		return (1);
-	}
-	return (0);
+	return (((tokens)->type == TOKEN_ENV && (tokens)->next
+			&& (tokens)->next->type != TOKEN_WHITESPACE
+			&& (tokens)->next->type != TOKEN_EOF) || ((tokens)->next
+			&& (tokens)->next->type == TOKEN_ENV));
 }
 
-int	skip_whitespace(t_token **tokens)
+int	is_whitespace(t_token **tokens)
 {
 	if ((*tokens)->type == TOKEN_WHITESPACE || (*tokens)->type == TOKEN_EMPTY)
 	{
@@ -368,7 +364,7 @@ int	skip_whitespace(t_token **tokens)
 	return (0);
 }
 
-int	parse_subshell_if_needed(t_token **tokens, t_tree_node **node,
+int	handle_subshell_token(t_token **tokens, t_tree_node **node,
 		t_tree_node **current)
 {
 	t_tree_node	*subshell_node;
@@ -376,7 +372,7 @@ int	parse_subshell_if_needed(t_token **tokens, t_tree_node **node,
 	if ((*tokens)->type == TOKEN_SUBSHELL)
 	{
 		subshell_node = parse_subshell(tokens);
-		if (!(*node))
+		if (*node == NULL)
 		{
 			*node = subshell_node;
 			*current = *node;
@@ -386,59 +382,47 @@ int	parse_subshell_if_needed(t_token **tokens, t_tree_node **node,
 			(*current)->right = subshell_node;
 			*current = (*current)->right;
 		}
+		*tokens = (*tokens)->next;
 		return (1);
 	}
 	return (0);
 }
 
-int	is_redirection(t_token_type type)
-{
-	return (type == TOKEN_REDIR_IN || type == TOKEN_REDIR_OUT
-		|| type == TOKEN_REDIR_APPEND || type == TOKEN_HEREDOC);
-}
-
-void	append_redirection(t_redirection **redirections,
-		t_redirection *new_redir)
-{
-	t_redirection	*last_redir;
-
-	if (!(*redirections))
-		*redirections = new_redir;
-	else
-	{
-		last_redir = *redirections;
-		while (last_redir->next)
-			last_redir = last_redir->next;
-		last_redir->next = new_redir;
-	}
-}
-
-int	parse_redirection_if_needed(t_token **tokens, t_redirection **redirections,
-		t_tree_node **node)
+int	handle_redirection_token(t_token **tokens, t_redirection **redirection)
 {
 	t_redirection	*new_redir;
+	t_redirection	*last_redir;
 
-	if (is_redirection((*tokens)->type))
+	if ((*tokens)->type == TOKEN_REDIR_IN || (*tokens)->type == TOKEN_REDIR_OUT
+		|| (*tokens)->type == TOKEN_REDIR_APPEND
+		|| (*tokens)->type == TOKEN_HEREDOC)
 	{
 		new_redir = parse_redirection(tokens);
-		if (!new_redir)
-		{
-			free_tree(node);
+		if (new_redir == NULL)
 			return (1);
+		if (*redirection == NULL)
+			*redirection = new_redir;
+		else
+		{
+			last_redir = *redirection;
+			while (last_redir->next)
+				last_redir = last_redir->next;
+			last_redir->next = new_redir;
 		}
-		append_redirection(redirections, new_redir);
+		*tokens = (*tokens)->next;
 		return (1);
 	}
 	return (0);
 }
 
-int	merge_words_and_wildcards(t_token **tokens)
+int	concatenate_tokens(t_token **tokens)
 {
 	char	*value;
 	t_token	*next;
 
-	if ((*tokens)->type == TOKEN_WORD || (*tokens)->type == TOKEN_BUILTIN
-		|| (*tokens)->type == TOKEN_WILDCARD || (*tokens)->type == TOKEN_ERROR)
+	if ((*tokens)->type == TOKEN_WORD || (*tokens)->type == TOKEN_ERROR
+		|| (*tokens)->type == TOKEN_BUILTIN
+		|| (*tokens)->type == TOKEN_WILDCARD)
 	{
 		while ((*tokens)->next && ((*tokens)->next->type == TOKEN_WORD
 				|| (*tokens)->next->type == TOKEN_WILDCARD))
@@ -457,35 +441,14 @@ int	merge_words_and_wildcards(t_token **tokens)
 	return (0);
 }
 
-int	add_token_to_tree(t_token *new_token, t_tree_node **node,
-		t_tree_node **current)
+int	handle_wildcard_token(t_token **tokens, t_tree_node **node)
 {
-	if (!new_token)
-		return (0);
-	if (!(*node))
-	{
-		*node = create_tree_node(new_token);
-		if (!(*node))
-			return (0);
-		*current = *node;
-	}
-	else
-	{
-		(*current)->right = create_tree_node(new_token);
-		if (!(*current)->right)
-			return (0);
-		*current = (*current)->right;
-	}
-	return (1);
-}
+	char		**matches;
+	int			i;
+	t_token		*new_token;
+	t_tree_node	*current;
 
-int	expand_wildcards_if_needed(t_token **tokens, t_tree_node **node,
-		t_tree_node **current)
-{
-	char	**matches;
-	t_token	*new_token;
-	int		i;
-
+	current = *node;
 	if ((*tokens)->type == TOKEN_WILDCARD)
 	{
 		matches = expand_wildcard((*tokens)->value);
@@ -496,46 +459,59 @@ int	expand_wildcards_if_needed(t_token **tokens, t_tree_node **node,
 			{
 				new_token = create_token(TOKEN_WORD, ft_strdup(matches[i]),
 						NORMAL);
-				if (!add_token_to_tree(new_token, node, current))
+				if (new_token == NULL)
 				{
 					free_array(matches);
-					return (1);
+					free_tree(node);
+					return (-1);
+				}
+				if (*node == NULL)
+				{
+					*node = create_tree_node(new_token);
+					free_token(&new_token);
+					if (*node == NULL)
+					{
+						free_token(&new_token);
+						free_array(matches);
+						return (-1);
+					}
+					current = *node;
+				}
+				else
+				{
+					current->right = create_tree_node(new_token);
+					free_token(&new_token);
+					if (current->right == NULL)
+					{
+						free_token(&new_token);
+						free_array(matches);
+						free_tree(node);
+						return (-1);
+					}
+					current = current->right;
 				}
 				i++;
 			}
 			free_array(matches);
 			*tokens = (*tokens)->next;
-			return (1);
 		}
 	}
 	return (0);
 }
 
-void	handle_node_creation(t_token **tokens, t_tree_node **node,
-		t_tree_node **current, t_redirection **redirections)
+void	add_node(t_tree_node **node, t_tree_node **current, t_token **token)
 {
-	if (!(*node))
+	if (*node == NULL)
 	{
-		*node = create_tree_node(*tokens);
+		*node = create_tree_node(*token);
 		*current = *node;
-		if (*redirections)
-		{
-			attach_redirections(*node, *redirections);
-			*redirections = NULL;
-		}
 	}
 	else
 	{
-		(*current)->right = create_tree_node(*tokens);
+		(*current)->right = create_tree_node(*token);
 		*current = (*current)->right;
 	}
-}
-
-void	attach_final_redirections(t_tree_node *node,
-		t_redirection *redirections)
-{
-	if (node && redirections)
-		attach_redirections(node, redirections);
+	*token = (*token)->next;
 }
 
 t_tree_node	*parse_command(t_token **tokens)
@@ -547,24 +523,23 @@ t_tree_node	*parse_command(t_token **tokens)
 	node = NULL;
 	current = NULL;
 	redirections = NULL;
-	while (*tokens && !is_control_operator((*tokens)->type))
+	while (*tokens && is_valid_token(*tokens))
 	{
-		if (attach_env_variable(tokens))
+		if (is_env_vars_attached(*tokens))
+			(*tokens)->is_atached = true;
+		if (is_whitespace(tokens))
 			continue ;
-		if (skip_whitespace(tokens))
+		if (handle_subshell_token(tokens, &node, &current))
 			continue ;
-		if (parse_subshell_if_needed(tokens, &node, &current))
+		if (handle_redirection_token(tokens, &redirections))
 			continue ;
-		if (parse_redirection_if_needed(tokens, &redirections, &node))
+		if (concatenate_tokens(tokens))
 			continue ;
-		if (merge_words_and_wildcards(tokens))
+		if (handle_wildcard_token(tokens, &node))
 			continue ;
-		if (expand_wildcards_if_needed(tokens, &node, &current))
-			continue ;
-		handle_node_creation(tokens, &node, &current, &redirections);
-		*tokens = (*tokens)->next;
+		add_node(&node, &current, tokens);
 	}
-	attach_final_redirections(node, redirections);
+	attach_redirections(node, redirections);
 	return (node);
 }
 
