@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 12:39:40 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/08 11:15:16 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/08 17:21:57 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,9 @@ t_token	*handle_quote_content(char **input, t_quote *state, char quote_type)
 {
 	char	*start;
 	t_token	*temp_token;
-	t_token *last_token = NULL;
+	t_token	*last_token;
 
+	last_token = NULL;
 	start = *input;
 	temp_token = NULL;
 	while (**input != '\0')
@@ -86,9 +87,7 @@ t_token	*handle_quote_content(char **input, t_quote *state, char quote_type)
 			}
 		}
 		else if (**input == quote_type)
-		{
 			return (process_quote_end(input, start, state, temp_token));
-		}
 		if (**input != '$')
 			(*input)++;
 	}

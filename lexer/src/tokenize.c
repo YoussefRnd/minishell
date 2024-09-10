@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/08 11:23:43 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/08 17:30:08 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,8 +98,9 @@ t_token	*get_next_token(char **input)
 int	process_token(t_token *token, t_token **head, t_token **tail,
 		t_token **last)
 {
-	t_token *current_token = token;
+	t_token	*current_token;
 
+	current_token = token;
 	while (current_token)
 	{
 		if (*head == NULL)
@@ -107,19 +108,16 @@ int	process_token(t_token *token, t_token **head, t_token **tail,
 		else
 			(*tail)->next = current_token;
 		*tail = current_token;
-
 		if (current_token->type == TOKEN_ERROR)
 		{
 			free_tokens(head);
 			return (0);
 		}
-
-		if (current_token->type != TOKEN_WHITESPACE && current_token->type != TOKEN_EOF)
+		if (current_token->type != TOKEN_WHITESPACE
+			&& current_token->type != TOKEN_EOF)
 			*last = current_token;
-
 		current_token = current_token->next;
 	}
-
 	return (1);
 }
 
