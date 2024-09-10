@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:27:02 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/10 15:15:48 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/10 18:41:17 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -339,179 +339,125 @@ t_tree_node	*parse_subshell(t_token **tokens)
 // 	return (node);
 // }
 
-int	is_valid_token(t_token *tokens)
-{
-	return (tokens && ((tokens)->type != TOKEN_EOF
-			&& (tokens)->type != TOKEN_PIPE && (tokens)->type != TOKEN_AND
-			&& (tokens)->type != TOKEN_OR));
-}
-
-int	is_env_vars_attached(t_token *tokens)
-{
-	return (((tokens)->type == TOKEN_ENV && (tokens)->next
-			&& (tokens)->next->type != TOKEN_WHITESPACE
-			&& (tokens)->next->type != TOKEN_EOF) || ((tokens)->next
-			&& (tokens)->next->type == TOKEN_ENV));
-}
-
-int	is_whitespace(t_token **tokens)
-{
-	if ((*tokens)->type == TOKEN_WHITESPACE || (*tokens)->type == TOKEN_EMPTY)
-	{
-		*tokens = (*tokens)->next;
-		return (1);
-	}
-	return (0);
-}
-
-int	handle_subshell_token(t_token **tokens, t_tree_node **node,
-		t_tree_node **current)
+t_tree_node	*handle_subshell_parsing(t_token **tokens, t_tree_node **node,
+	t_tree_node **current)
 {
 	t_tree_node	*subshell_node;
 
-	if ((*tokens)->type == TOKEN_SUBSHELL)
-	{
-		subshell_node = parse_subshell(tokens);
-		if (*node == NULL)
-		{
-			*node = subshell_node;
-			*current = *node;
-		}
-		else
-		{
-			(*current)->right = subshell_node;
-			*current = (*current)->right;
-		}
-		*tokens = (*tokens)->next;
-		return (1);
-	}
-	return (0);
-}
-
-int	handle_redirection_token(t_token **tokens, t_redirection **redirection)
-{
-	t_redirection	*new_redir;
-	t_redirection	*last_redir;
-
-	if ((*tokens)->type == TOKEN_REDIR_IN || (*tokens)->type == TOKEN_REDIR_OUT
-		|| (*tokens)->type == TOKEN_REDIR_APPEND
-		|| (*tokens)->type == TOKEN_HEREDOC)
-	{
-		new_redir = parse_redirection(tokens);
-		if (new_redir == NULL)
-			return (1);
-		if (*redirection == NULL)
-			*redirection = new_redir;
-		else
-		{
-			last_redir = *redirection;
-			while (last_redir->next)
-				last_redir = last_redir->next;
-			last_redir->next = new_redir;
-		}
-		*tokens = (*tokens)->next;
-		return (1);
-	}
-	return (0);
-}
-
-int	concatenate_tokens(t_token **tokens)
-{
-	char	*value;
-	t_token	*next;
-
-	if ((*tokens)->type == TOKEN_WORD || (*tokens)->type == TOKEN_ERROR
-		|| (*tokens)->type == TOKEN_BUILTIN
-		|| (*tokens)->type == TOKEN_WILDCARD)
-	{
-		while ((*tokens)->next && ((*tokens)->next->type == TOKEN_WORD
-				|| (*tokens)->next->type == TOKEN_WILDCARD))
-		{
-			value = ft_strjoin((*tokens)->value, (*tokens)->next->value);
-			free((*tokens)->value);
-			(*tokens)->value = value;
-			if ((*tokens)->next->type == TOKEN_WILDCARD)
-				(*tokens)->type = TOKEN_WILDCARD;
-			next = (*tokens)->next;
-			(*tokens)->next = next->next;
-			free(next);
-		}
-		return (1);
-	}
-	return (0);
-}
-
-int	handle_wildcard_token(t_token **tokens, t_tree_node **node)
-{
-	char		**matches;
-	int			i;
-	t_token		*new_token;
-	t_tree_node	*current;
-
-	current = *node;
-	if ((*tokens)->type == TOKEN_WILDCARD)
-	{
-		matches = expand_wildcard((*tokens)->value);
-		if (matches)
-		{
-			i = 0;
-			while (matches[i])
-			{
-				new_token = create_token(TOKEN_WORD, ft_strdup(matches[i]),
-						NORMAL);
-				if (new_token == NULL)
-				{
-					free_array(matches);
-					free_tree(node);
-					return (-1);
-				}
-				if (*node == NULL)
-				{
-					*node = create_tree_node(new_token);
-					free_token(&new_token);
-					if (*node == NULL)
-					{
-						free_token(&new_token);
-						free_array(matches);
-						return (-1);
-					}
-					current = *node;
-				}
-				else
-				{
-					current->right = create_tree_node(new_token);
-					free_token(&new_token);
-					if (current->right == NULL)
-					{
-						free_token(&new_token);
-						free_array(matches);
-						free_tree(node);
-						return (-1);
-					}
-					current = current->right;
-				}
-				i++;
-			}
-			free_array(matches);
-			*tokens = (*tokens)->next;
-		}
-	}
-	return (0);
-}
-
-void	add_node(t_tree_node **node, t_tree_node **current, t_token **token)
-{
+	subshell_node = parse_subshell(tokens);
 	if (*node == NULL)
 	{
-		*node = create_tree_node(*token);
+		*node = subshell_node;
 		*current = *node;
 	}
 	else
 	{
-		(*current)->right = create_tree_node(*token);
+		(*current)->right = subshell_node;
 		*current = (*current)->right;
 	}
-	*token = (*token)->next;
+	return (*node);
+}
+
+void	handle_redirection_parsing(t_token **tokens, t_redirection **redirections,
+	t_tree_node **node)
+{
+	t_redirection	*new_redir;
+	t_redirection	*last_redir;
+
+	new_redir = parse_redirection(tokens);
+	if (new_redir == NULL)
+	{
+		free_tree(node);
+		return ;
+	}
+	if (*redirections == NULL)
+		*redirections = new_redir;
+	else
+	{
+		last_redir = *redirections;
+		while (last_redir->next)
+			last_redir = last_redir->next;
+		last_redir->next = new_redir;
+	}
+}
+
+void	handle_word_concat(t_token **tokens)
+{
+	t_token	*next;
+	char	*value;
+
+	while ((*tokens)->next && ((*tokens)->next->type == TOKEN_WORD
+			|| (*tokens)->next->type == TOKEN_WILDCARD))
+	{
+		value = ft_strjoin((*tokens)->value, (*tokens)->next->value);
+		free((*tokens)->value);
+		(*tokens)->value = value;
+		if ((*tokens)->next->type == TOKEN_WILDCARD)
+			(*tokens)->type = TOKEN_WILDCARD;
+		next = (*tokens)->next;
+		(*tokens)->next = next->next;
+		free(next);
+	}
+}
+
+int	handle_wildcard(t_token **tokens, t_tree_node **node,
+	t_tree_node **current)
+{
+	char		**matches;
+	t_token		*new_token;
+	int			i;
+
+	matches = expand_wildcard((*tokens)->value);
+	if (!matches)
+		return (0);
+
+	i = 0;
+	while (matches[i])
+	{
+		new_token = create_token(TOKEN_WORD, ft_strdup(matches[i]), NORMAL);
+		if (new_token == NULL)
+		{
+			free_array(matches);
+			free_tree(node);
+			return (1);
+		}
+		if (*node == NULL)
+		{
+			*node = create_tree_node(new_token);
+			free_token(&new_token);
+			*current = *node;
+		}
+		else
+		{
+			(*current)->right = create_tree_node(new_token);
+			*current = (*current)->right;
+		}
+		free_token(&new_token);
+		i++;
+	}
+	free_array(matches);
+	*tokens = (*tokens)->next;
+	return (1);
+}
+
+void	handle_node_creation(t_token **tokens, t_tree_node **node,
+	t_tree_node **current, t_redirection **redirections)
+{
+	if (*node == NULL)
+	{
+		*node = create_tree_node(*tokens);
+		*current = *node;
+		if (*redirections)
+		{
+			attach_redirections(*node, *redirections);
+			*redirections = NULL;
+		}
+	}
+	else
+	{
+		(*current)->right = create_tree_node(*tokens);
+		*current = (*current)->right;
+	}
 }
 
 t_tree_node	*parse_command(t_token **tokens)
@@ -523,25 +469,46 @@ t_tree_node	*parse_command(t_token **tokens)
 	node = NULL;
 	current = NULL;
 	redirections = NULL;
-	while (*tokens && is_valid_token(*tokens))
+	while (*tokens && ((*tokens)->type != TOKEN_EOF
+			&& (*tokens)->type != TOKEN_PIPE && (*tokens)->type != TOKEN_AND
+			&& (*tokens)->type != TOKEN_OR))
 	{
-		if (is_env_vars_attached(*tokens))
+		if (((*tokens)->type == TOKEN_ENV && (*tokens)->next
+				&& (*tokens)->next->type != TOKEN_WHITESPACE
+				&& (*tokens)->next->type != TOKEN_EOF) || ((*tokens)->next
+				&& (*tokens)->next->type == TOKEN_ENV))
 			(*tokens)->is_atached = true;
-		if (is_whitespace(tokens))
+		if ((*tokens)->type == TOKEN_WHITESPACE
+			|| (*tokens)->type == TOKEN_EMPTY)
+		{
+			*tokens = (*tokens)->next;
 			continue ;
-		if (handle_subshell_token(tokens, &node, &current))
+		}
+		if ((*tokens)->type == TOKEN_SUBSHELL)
+		{
+			node = handle_subshell_parsing(tokens, &node, &current);
 			continue ;
-		if (handle_redirection_token(tokens, &redirections))
+		}
+		if ((*tokens)->type == TOKEN_REDIR_IN
+			|| (*tokens)->type == TOKEN_REDIR_OUT
+			|| (*tokens)->type == TOKEN_REDIR_APPEND
+			|| (*tokens)->type == TOKEN_HEREDOC)
+		{
+			handle_redirection_parsing(tokens, &redirections, &node);
 			continue ;
-		if (concatenate_tokens(tokens))
+		}
+		handle_word_concat(tokens);
+		if ((*tokens)->type == TOKEN_WILDCARD && handle_wildcard(tokens, &node, &current))
 			continue ;
-		if (handle_wildcard_token(tokens, &node))
-			continue ;
-		add_node(&node, &current, tokens);
+
+		handle_node_creation(tokens, &node, &current, &redirections);
+		*tokens = (*tokens)->next;
 	}
-	attach_redirections(node, redirections);
+	if (node && redirections)
+		attach_redirections(node, redirections);
 	return (node);
 }
+
 
 t_tree_node	*parse_pipe(t_token **tokens)
 {
