@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/13 11:00:07 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/06 15:38:34 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/12 22:20:39 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,11 +76,35 @@ void	free_array(char **array)
 	int	i;
 
 	i = 0;
-	while (array[i])
+	while (array && array[i])
 	{
 		free(array[i]);
 		i++;
 	}
 	free(array);
 	array = NULL;
+}
+
+void	sort_array(char **array)
+{
+	int		i;
+	int		j;
+	char	*tmp;
+
+	i = 0;
+	while (array && array[i])
+	{
+		j = i + 1;
+		while (array[j])
+		{
+			if (ft_strcmp(array[i], array[j]) > 0)
+			{
+				tmp = array[i];
+				array[i] = array[j];
+				array[j] = tmp;
+			}
+			j++;
+		}
+		i++;
+	}
 }

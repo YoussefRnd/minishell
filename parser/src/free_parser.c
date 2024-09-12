@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 14:11:11 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/09 13:33:19 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/12 22:33:10 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,4 +61,13 @@ void	free_tree(t_tree_node **node)
 	}
 	free(*node);
 	*node = NULL;
+}
+
+char	**free_wildcards_on_error(char **matches, DIR *dir)
+{
+	if (dir)
+		closedir(dir);
+	if (matches)
+		free_array(matches);
+	return (NULL);
 }

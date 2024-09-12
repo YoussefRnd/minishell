@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:31:45 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/08/04 15:09:03 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/12 22:33:49 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,13 +36,34 @@ typedef struct s_tree_node
 	t_redirection			*redirections;
 }							t_tree_node;
 
-t_tree_node					*parse(t_token **tokens);
-void						print_tree(t_tree_node *node, char *indent,
-								bool is_last);
-void						free_tree(t_tree_node **node);
+t_tree_node					*create_tree_node(t_token *token);
 
+t_tree_node					*parse(t_token **tokens);
+t_tree_node					*parse_and_or(t_token **tokens);
+t_tree_node					*parse_pipe(t_token **tokens);
+t_tree_node					*parse_command(t_token **tokens);
+t_tree_node					*parse_subshell(t_token **tokens);
+
+t_redirection				*parse_redirection(t_token **tokens);
 void						attach_redirections(t_tree_node *node,
 								t_redirection *redir);
-t_redirection				*parse_redirection(t_token **tokens);
+void						here_doc(t_redirection *redir);
+
+char						**expand_wildcard(char *pattern);
+
+bool						is_valid_token(int token_type);
+bool						is_env_token_attached(t_token **tokens);
+bool						is_redirection_token(t_token **tokens);
+
+void						concatenate_tokens_if_needed(t_token **tokens);
+
+int							add_wildcard_token_to_tree(t_token **tokens,
+								t_tree_node **node, t_tree_node **current);
+
+char						**free_wildcards_on_error(char **matches, DIR *dir);
+void						free_tree(t_tree_node **node);
+
+void						print_tree(t_tree_node *node, char *indent,
+								bool is_last);
 
 #endif
