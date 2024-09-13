@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/12 11:10:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/08 17:30:08 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/13 22:50:58 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,54 +46,6 @@ t_token	*get_next_token(char **input)
 		return (handle_default(input, state));
 	return (create_token(TOKEN_UNKNOWN, ft_strdup(""), state));
 }
-
-// t_token	*tokenize(char *input)
-// {
-// 	t_token	*head;
-// 	t_token	*tail;
-// 	t_token	*token;
-// 	t_token	*last;
-
-// 	head = NULL;
-// 	tail = NULL;
-// 	last = NULL;
-// 	while (1)
-// 	{
-// 		token = get_next_token(&input);
-// 		if (token == NULL)
-// 			break ;
-// 		if (head == NULL)
-// 			head = token;
-// 		else
-// 			tail->next = token;
-// 		tail = token;
-// 		if (token->type == TOKEN_ERROR)
-// 		{
-// 			free_tokens(&head);
-// 			return (NULL);
-// 		}
-// 		if (token->type != TOKEN_WHITESPACE && token->type != TOKEN_EOF)
-// 			last = token;
-// 		if (token->type == TOKEN_EOF)
-// 			break ;
-// 	}
-// 	if (head && (head->type == TOKEN_AND || head->type == TOKEN_PIPE
-// 			|| head->type == TOKEN_OR))
-// 	{
-// 		error("minishell: syntax error near unexpected token", head->value,
-// 			258);
-// 		free_tokens(&head);
-// 		return (NULL);
-// 	}
-// 	if (last && (last->type == TOKEN_AND || last->type == TOKEN_PIPE
-// 			|| last->type == TOKEN_OR))
-// 	{
-// 		error("minishell: syntax error near unexpected token", last->value, 1);
-// 		free_tokens(&head);
-// 		return (NULL);
-// 	}
-// 	return (head);
-// }
 
 int	process_token(t_token *token, t_token **head, t_token **tail,
 		t_token **last)
@@ -135,6 +87,11 @@ t_token	*check_token_syntax(t_token *head, t_token *last)
 			|| last->type == TOKEN_OR))
 	{
 		error("minishell: syntax error near unexpected token", last->value, 1);
+		free_tokens(&head);
+		return (NULL);
+	}
+	if (check_token_sequence(head))
+	{
 		free_tokens(&head);
 		return (NULL);
 	}

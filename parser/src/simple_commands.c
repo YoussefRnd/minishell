@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 14:52:33 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/12 19:32:09 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/13 23:40:19 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ t_tree_node	*add_subshell_token_to_tree(t_token **tokens, t_tree_node **node,
 	return (*node);
 }
 
-void	add_redirection_token_to_node(t_token **tokens,
+bool	add_redirection_token_to_node(t_token **tokens,
 		t_redirection **redirections, t_tree_node **node)
 {
 	t_redirection	*new_redir;
@@ -41,7 +41,7 @@ void	add_redirection_token_to_node(t_token **tokens,
 	if (new_redir == NULL)
 	{
 		free_tree(node);
-		return ;
+		return (false);
 	}
 	if (*redirections == NULL)
 		*redirections = new_redir;
@@ -52,6 +52,7 @@ void	add_redirection_token_to_node(t_token **tokens,
 			last_redir = last_redir->next;
 		last_redir->next = new_redir;
 	}
+	return (true);
 }
 
 void	create_tree_node_from_token(t_token **tokens, t_tree_node **node,
@@ -91,7 +92,8 @@ void	process_tokens(t_token **tokens, t_tree_node **node,
 	}
 	if (is_redirection_token(tokens))
 	{
-		add_redirection_token_to_node(tokens, redirections, node);
+		if (!add_redirection_token_to_node(tokens, redirections, node))
+			*tokens = (*tokens)->next;
 		return ;
 	}
 	concatenate_tokens_if_needed(tokens);
@@ -115,5 +117,7 @@ t_tree_node	*parse_command(t_token **tokens)
 		process_tokens(tokens, &node, &current, &redirections);
 	if (node && redirections)
 		attach_redirections(node, redirections);
+	else if (!node && redirections)
+		free_redirections(&redirections);
 	return (node);
 }

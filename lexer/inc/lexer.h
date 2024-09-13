@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:01:12 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/13 12:07:00 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/13 22:50:37 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ t_token				*create_token(t_token_type type, char *value,
 void				free_tokens(t_token **head);
 void				free_token(t_token **token);
 void				error(char *msg, char *token, int exit_status);
+bool				check_token_sequence(t_token *head);
 
 t_token				*handle_dollar(char **input, t_quote state);
 

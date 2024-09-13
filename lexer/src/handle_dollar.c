@@ -6,17 +6,11 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 12:42:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/13 12:04:39 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/13 22:46:58 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/lexer.h"
-
-t_token	*handle_special_var(char **input, t_quote state)
-{
-	(*input)++;
-	return (create_token(TOKEN_SPECIAL_VAR, ft_strdup("?"), state));
-}
 
 t_token	*create_env_token(char **input, t_quote state)
 {
@@ -83,7 +77,8 @@ t_token	*handle_non_alnum(char **input, t_quote state)
 	start = *input;
 	if (**input == '$')
 		(*input)++;
-	while (!ft_isspace(**input) && !strchr("<>|&$\"\'", **input))
+	while ((!strchr("<>|&$\"\'", **input) && state != IN_QUOTES)
+		|| (state == IN_QUOTES && **input != '\''))
 		(*input)++;
 	value = ft_strndup(start, *input - start);
 	return (create_token(TOKEN_WORD, value, state));

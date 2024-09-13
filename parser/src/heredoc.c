@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 19:26:27 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/12 19:26:31 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/13 23:50:18 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,4 +32,17 @@ void	here_doc(t_redirection *redir)
 		free(tmp);
 		free(line);
 	}
+}
+
+void	handle_heredoc(t_redirection *redir, t_token *file_token)
+{
+	if (file_token->type == TOKEN_ENV)
+		redir->delimiter = ft_strjoin("$", redir->file);
+	else
+		redir->delimiter = redir->file;
+	free(redir->file);
+	redir->file = "/tmp/heredoc";
+	open_redirection_file(redir);
+	here_doc(redir);
+	close(redir->fd);
 }

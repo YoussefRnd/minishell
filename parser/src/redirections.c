@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 14:12:23 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/12 19:27:40 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/13 23:50:57 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,14 +34,6 @@ void	open_redirection_file(t_redirection *redir)
 	}
 }
 
-void	handle_heredoc(t_redirection *redir)
-{
-	redir->delimiter = redir->file;
-	redir->file = "/tmp/heredoc";
-	open_redirection_file(redir);
-	here_doc(redir);
-}
-
 t_redirection	*initialize_redirection(t_token **tokens)
 {
 	t_redirection	*redir;
@@ -55,32 +47,42 @@ t_redirection	*initialize_redirection(t_token **tokens)
 	return (redir);
 }
 
+t_redirection	*initialize_file_token(t_token **tokens, t_redirection *redir)
+{
+	t_token	*file_token;
+
+	file_token = (*tokens)->next;
+	while (file_token && file_token->type == TOKEN_WHITESPACE)
+		file_token = file_token->next;
+	if (file_token && (file_token->type == TOKEN_WORD
+			|| file_token->type == TOKEN_ENV
+			|| file_token->type == TOKEN_SPECIAL_VAR))
+	{
+		redir->file = ft_strdup(file_token->value);
+		*tokens = file_token->next;
+		return (redir);
+	}
+	return (NULL);
+}
+
 t_redirection	*parse_redirection(t_token **tokens)
 {
 	t_redirection	*redir;
-	t_token			*file_token;
 
 	redir = initialize_redirection(tokens);
 	if (!redir)
 		return (NULL);
-	file_token = (*tokens)->next;
-	while (file_token && file_token->type == TOKEN_WHITESPACE)
-		file_token = file_token->next;
-	if (file_token && file_token->type == TOKEN_WORD)
-	{
-		redir->file = ft_strdup(file_token->value);
-		*tokens = file_token->next;
-		if (redir->type == TOKEN_HEREDOC)
-			handle_heredoc(redir);
-		else
-			redir->delimiter = NULL;
-	}
-	else
+	redir = initialize_file_token(tokens, redir);
+	if (!redir)
 	{
 		error("syntax error near unexpected token", "newline", 258);
 		free(redir);
-		redir = NULL;
+		return (NULL);
 	}
+	if (redir->type == TOKEN_HEREDOC)
+		handle_heredoc(redir, *tokens);
+	else
+		redir->delimiter = NULL;
 	return (redir);
 }
 
