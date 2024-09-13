@@ -1,7 +1,7 @@
 NAME = minishell
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -lreadline -fsanitize=address
+CFLAGS = -g #-Wall -Wextra -Werror -lreadline -fsanitize=address
 RM = rm -fr
 MKDIR = mkdir -p
 

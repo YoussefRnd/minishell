@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 12:39:40 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/08 17:21:57 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/13 08:34:22 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,21 @@ t_token	*process_quote_end(char **input, char *start, t_quote *state,
 	return (create_token(TOKEN_WORD, value, *state));
 }
 
+t_token *handle_dollar_in_quotes(char **input, t_quote *state, t_token **last_token, t_token **temp_token)
+{
+    if (*last_token != NULL)
+    {
+        (*last_token)->next = handle_dollar(input, *state);
+        *last_token = (*last_token)->next;
+    }
+    else
+    {
+        *temp_token = handle_dollar(input, *state);
+        *last_token = *temp_token;
+    }
+    return *temp_token;
+}
+
 t_token	*handle_quote_content(char **input, t_quote *state, char quote_type)
 {
 	char	*start;
@@ -74,21 +89,10 @@ t_token	*handle_quote_content(char **input, t_quote *state, char quote_type)
 	while (**input != '\0')
 	{
 		if (**input == '$' && *state == IN_DQUOTES)
-		{
-			if (last_token != NULL)
-			{
-				last_token->next = handle_dollar(input, *state);
-				last_token = last_token->next;
-			}
-			else
-			{
-				temp_token = handle_dollar(input, *state);
-				last_token = temp_token;
-			}
-		}
+			temp_token = handle_dollar_in_quotes(input, state, &last_token, &temp_token);
 		else if (**input == quote_type)
 			return (process_quote_end(input, start, state, temp_token));
-		if (**input != '$')
+		if (**input != '$' || *state != IN_DQUOTES)
 			(*input)++;
 	}
 	return (temp_token);
