@@ -6,59 +6,89 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/16 12:55:29 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/08/07 13:19:53 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/09/13 01:03:25 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
 #include "../inc/builtins.h"
 
-// TODO the value
-void print_list_exp(t_env *list)
+void	print_list_exp(t_env *list)
 {
-    t_env *current = list;
+	t_env	*current;
 
-    while (current != NULL)
-    {
-        if (current->value == NULL)
-        {
-            printf("declare -x %s\n", current->key);
-        }
-        else
-        {
-            printf("declare -x %s=\"%s\"\n", current->key, current->value);
-        }
-        current = current->next;
-    }
+	current = list;
+	while (current != NULL)
+	{
+		if (current->value == NULL)
+		{
+			printf("declare -x %s\n", current->key);
+		}
+		else
+		{
+			printf("declare -x %s=\"%s\"\n", current->key, current->value);
+		}
+		current = current->next;
+	}
 }
 
-int respond_to_export(t_env **list, t_tree_node *cmd)
+void	traverse_and_expand(t_tree_node *tree, t_env *env)
 {
-    int in = dup(STDIN_FILENO);
-	int out = dup(STDOUT_FILENO);
-    char **args = traverse_right_and_collect_values(cmd->right, list, true);
-    // printf("inside of export\n");
-    if (!args){
-        if (cmd->redirections)
-            handle_redir(cmd->redirections);
-        print_list_exp(*list);
-    }
-    else
-    {
-        while(*args)
-        {
-            //TODO check the validity of arguments
-            // check the key for validity
-            // 
-            append_node(list, *args);
-            // printf("the argument:%s\n", *args);
-            args++;
-        }
-    }
-    dup2(in, STDIN_FILENO);
-    dup2(out, STDOUT_FILENO);
-    return (0);
-    // we gotta handle failures
-    // change the value if it got the same key
-    // and free up memory
+	t_tree_node	*current;
+	char		*wraper;
+
+	if (!tree || !env)
+		return ;
+	current = tree->right;
+	while (current)
+	{
+		if (current->token->type == TOKEN_ENV)
+		{
+			wraper = ft_strdup(current->token->value);
+			safe_free(&current->token->value);
+			current->token->value = find_and_return_value(env, wraper);
+			safe_free(&wraper);
+			current->token->type = TOKEN_WORD;
+		}
+		current = current->right;
+	}
+}
+
+void	free_n(t_tree_node **node)
+{
+	free_token(&(*node)->token);
+	free_redirections(&(*node)->redirections);
+	free(*node);
+	*node = NULL;
+}
+
+void	remove_node(t_tree_node **head, t_tree_node *node_to_remove)
+{
+	t_tree_node	*prev;
+	t_tree_node	*temp;
+
+	if (*head == NULL || node_to_remove == NULL)
+		return ;
+	if (*head == node_to_remove)
+		*head = node_to_remove->right;
+	prev = NULL;
+	temp = *head;
+	while (temp != NULL && temp != node_to_remove)
+	{
+		prev = temp;
+		temp = temp->right;
+	}
+	if (temp == NULL)
+		return ;
+	if (prev != NULL)
+		prev->right = node_to_remove->right;
+	free_n(&node_to_remove);
+}
+
+void	update_current_token_value(t_tree_node *current, char **copy)
+{
+	*copy = ft_strdup(current->token->value);
+	safe_free(&current->token->value);
+	current->token->value = ft_strjoin(*copy, current->right->token->value);
+	safe_free(copy);
 }

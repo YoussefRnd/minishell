@@ -6,18 +6,16 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 11:42:38 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/08/06 22:23:29 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/09/12 17:33:29 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef EXECUTION_H
 # define EXECUTION_H
 
-// #include "../../lexer/inc/lexer.h"
 # include "../../builtins/inc/builtins.h"
 # include "../../inc/minishell.h"
 # include "../../parser/inc/parser.h"
-// #include "../../parser/inc/parser.h"
 
 void	_execute(t_tree_node *tree, t_env **env, bool *forked);
 void	cmd_execute(t_tree_node *cmd, t_env **envps);
@@ -35,8 +33,15 @@ void	operators_deal(t_tree_node *tree, t_env **env, bool *forked);
 char	*get_value(t_env *env, char *key);
 void	signal_handler_in_p(void);
 void	signal_handler_in_c(void);
-void    handle_exit_status();
-void    ft_exit(int num);
-
+void	handle_exit_status(void);
+void	ft_pipe(int *pfd);
+void	ft_exit(int num);
+void	pipes_deal(t_tree_node *tree, t_env **env, bool *forked);
+void	words_deal(t_tree_node *tree, t_env **env, bool *forked);
+void	subshells_deal(t_tree_node *tree, t_env **env, bool *forked);
+void	envs_deal(t_tree_node *tree, t_env **env, bool *forked);
+void	safe_free(char **ptr);
+void	handle_redirections_if_present(t_tree_node *tree);
+void	process_tok(t_tree_node *current, t_env *env);
 
 #endif

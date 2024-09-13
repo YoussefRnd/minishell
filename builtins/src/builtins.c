@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/30 10:14:12 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/08/07 13:29:54 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/09/10 12:43:06 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int	respond_to_b(t_tree_node *cmd, t_env **env)
 	else if (ft_strcmp(cmd->token->value, "unset") == 0)
 		return (respond_to_unset(env, cmd));
 	else if (ft_strcmp(cmd->token->value, "exit") == 0)
-	    return (respond_to_exit(cmd->right, env));
+		return (respond_to_exit(cmd->right, env));
 	else if (ft_strcmp(cmd->token->value, "pwd") == 0)
 		return (respond_to_pwd(cmd));
 	else if (ft_strcmp(cmd->token->value, "echo") == 0)
