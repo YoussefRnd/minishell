@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:01:12 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/05 13:26:41 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/13 12:07:00 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ void				error(char *msg, char *token, int exit_status);
 t_token				*handle_dollar(char **input, t_quote state);
 
 t_token				*handle_quote(char **input, t_quote *state);
+t_token				*handle_non_alnum(char **input, t_quote state);
 
 t_token				*handle_subshell(char **input, t_quote state);
 

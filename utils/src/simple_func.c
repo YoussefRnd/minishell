@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/13 11:00:07 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/12 22:20:39 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/13 09:47:46 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,20 +69,6 @@ void	*ft_realloc(void *ptr, size_t size)
 		free(ptr);
 	}
 	return (new_ptr);
-}
-
-void	free_array(char **array)
-{
-	int	i;
-
-	i = 0;
-	while (array && array[i])
-	{
-		free(array[i]);
-		i++;
-	}
-	free(array);
-	array = NULL;
 }
 
 void	sort_array(char **array)
