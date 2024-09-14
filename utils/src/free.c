@@ -1,25 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.h                                            :+:      :+:    :+:   */
+/*   free.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/13 11:04:42 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/12 16:29:49 by yboumlak         ###   ########.fr       */
+/*   Created: 2024/09/13 09:47:51 by yboumlak          #+#    #+#             */
+/*   Updated: 2024/09/13 09:47:58 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef UTILS_H
-# define UTILS_H
+#include "../inc/utils.h"
 
-# include "../../inc/minishell.h"
+void	free_array(char **array)
+{
+	int	i;
 
-int		ft_isspace(char c);
-int		ft_strcmp(const char *s1, const char *s2);
-char	*ft_strndup(char *str, int n);
-void	*ft_realloc(void *ptr, size_t size);
-void	free_array(char **array);
-void	sort_array(char **array);
-
-#endif
+	i = 0;
+	while (array && array[i])
+	{
+		free(array[i]);
+		i++;
+	}
+	free(array);
+	array = NULL;
+}
