@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 12:31:45 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/13 23:50:29 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/14 12:06:45 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ void						attach_redirections(t_tree_node *node,
 void						here_doc(t_redirection *redir);
 void						handle_heredoc(t_redirection *redir,
 								t_token *file_token);
+void						open_redirection_file(t_redirection *redir);
 
 char						**expand_wildcard(char *pattern);
 
