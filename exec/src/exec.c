@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/20 15:26:23 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/09/14 15:54:17 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/09/14 18:18:31 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,8 @@ void	cmd_execute(t_tree_node *cmd, t_env **envps)
 	holder = find_and_return_value(*envps, "PATH");
 	path_dirs = ft_split(holder, ':');
 	safe_free(&holder);
+	if (its_a_directory(cmd->token->value))
+		exit(126);
 	path = find_path(cmd->token->value, path_dirs);
 	if (!path)
 		exit(127);
