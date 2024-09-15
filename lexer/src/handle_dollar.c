@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 12:42:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/15 21:28:13 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/15 21:56:13 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,6 @@ t_token	*handle_non_alnum(char **input, t_quote state)
 
 t_token	*handle_dollar(char **input, t_quote state)
 {
-
 	(*input)++;
 	if (**input == '?')
 	{
