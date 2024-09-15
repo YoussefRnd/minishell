@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 12:42:43 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/15 19:56:31 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/15 21:28:13 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,8 @@ t_token	*handle_double_dollar(char **input, t_quote state)
 	if (count % 2 == 0)
 	{
 		start = *input;
-		while (**input && !isspace(**input) && **input != '$' && **input != '\"')
+		while (**input && !isspace(**input) && **input != '$'
+			&& **input != '\"')
 			(*input)++;
 		value = ft_strndup(start, *input - start);
 		return (create_token(TOKEN_WORD, value, state));
@@ -83,6 +84,7 @@ t_token	*handle_non_alnum(char **input, t_quote state)
 
 t_token	*handle_dollar(char **input, t_quote state)
 {
+
 	(*input)++;
 	if (**input == '?')
 	{
@@ -95,15 +97,10 @@ t_token	*handle_dollar(char **input, t_quote state)
 		return (handle_double_dollar(input, state));
 	}
 	if (ft_isdigit(**input))
-    {
+	{
 		(*input)--;
-        char *start = *input;
-		(*input)++;
-        while (ft_isdigit(**input))
-            (*input)++;
-        char *value = ft_strndup(start, *input - start);
-        return (create_token(TOKEN_WORD, value, state));
-    }
+		return (handle_env_digit(input, state));
+	}
 	if ((ft_isalpha(**input) || **input == '_') && **input != '\0')
 		return (handle_env_var(input, state));
 	return (handle_non_alnum(input, state));

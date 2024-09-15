@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 13:24:33 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/05 13:26:05 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/15 21:25:09 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,19 @@ t_token_type	is_builtin(char *value)
 		return (TOKEN_BUILTIN);
 	else
 		return (TOKEN_WORD);
+}
+
+t_token	*handle_env_digit(char **input, t_quote state)
+{
+	char	*start;
+	char	*value;
+
+	start = *input;
+	(*input)++;
+	while (ft_isdigit(**input))
+		(*input)++;
+	value = ft_strndup(start, *input - start);
+	return (create_token(TOKEN_WORD, value, state));
 }
 
 t_token	*handle_default(char **input, t_quote state)
