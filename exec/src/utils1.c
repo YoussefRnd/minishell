@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 17:23:31 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/09/14 15:54:17 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/09/15 14:59:22 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,10 +70,7 @@ void	subshells_deal(t_tree_node *tree, t_env **env, bool *forked)
 	{
 		wait(&g_status);
 		handle_exit_status();
-		dup2(out, STDOUT_FILENO);
-		dup2(in, STDIN_FILENO);
-		close(in);
-		close(out);
+		handle_duplication_and_close(out, in);
 	}
 }
 
