@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 14:12:23 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/14 15:00:22 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/15 20:53:24 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,18 +68,20 @@ t_redirection	*parse_redirection(t_token **tokens)
 {
 	t_redirection	*redir;
 	t_token			*file_token;
+	t_redirection	*new_redir;
 
 	file_token = NULL;
 	redir = initialize_redirection(tokens);
 	if (!redir)
 		return (NULL);
-	redir = initialize_file_token(tokens, redir, &file_token);
-	if (!redir)
+	new_redir = initialize_file_token(tokens, redir, &file_token);
+	if (!new_redir)
 	{
 		error("syntax error near unexpected token", "newline", 258);
 		free(redir);
 		return (NULL);
 	}
+	redir = new_redir;
 	if (redir->type == TOKEN_HEREDOC)
 		handle_heredoc(redir, file_token);
 	else
