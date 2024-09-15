@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strjoin.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: luda <luda@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/11 19:18:53 by yboumlak          #+#    #+#             */
-/*   Updated: 2023/12/22 16:07:20 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/14 13:15:59 by luda             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	char	*new_str;
 	size_t	total_len;
 
-	if (!s1 || !s2)
+	if (!s1 && !s2)
 		return (NULL);
 	total_len = ft_strlen(s1) + ft_strlen(s2) + 1;
 	new_str = (char *)malloc(total_len * sizeof(char));

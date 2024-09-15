@@ -3,13 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 16:59:08 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/07/13 18:54:24 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/14 16:33:10 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../lib/Libft/libft.h"
-#include <stdbool.h>
-#include <stdlib.h>
+#ifndef MINISHELL_H
+# define MINISHELL_H
+
+# include "../lib/Libft/libft.h"
+# include <readline/history.h>
+# include <readline/readline.h>
+# include <signal.h>
+# include <stdbool.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <sys/wait.h>
+# include <unistd.h>
+
+int				g_status;
+#endif
