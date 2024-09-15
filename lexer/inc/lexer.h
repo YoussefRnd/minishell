@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:01:12 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/13 22:50:37 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/15 21:26:31 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,13 @@ typedef struct s_token
 	bool			is_atached;
 }					t_token;
 
+typedef struct s_quote_state
+{
+	t_token			*head_token;
+	t_token			*last_token;
+	char			*start;
+}					t_quote_state;
+
 t_token				*tokenize(char *input);
 t_token				*get_next_token(char **input);
 t_token				*create_token(t_token_type type, char *value,
@@ -68,6 +75,7 @@ t_token				*handle_dollar(char **input, t_quote state);
 
 t_token				*handle_quote(char **input, t_quote *state);
 t_token				*handle_non_alnum(char **input, t_quote state);
+t_token				*handle_env_digit(char **input, t_quote state);
 
 t_token				*handle_subshell(char **input, t_quote state);
 

@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 17:22:23 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/12 22:34:56 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/15 21:30:29 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,13 @@ bool	is_valid_token(int token_type)
 
 bool	is_env_token_attached(t_token **tokens)
 {
-	return (((*tokens)->type == TOKEN_ENV && (*tokens)->next
-			&& (*tokens)->next->type != TOKEN_WHITESPACE
-			&& (*tokens)->next->type != TOKEN_EOF) || ((*tokens)->next
-			&& (*tokens)->next->type == TOKEN_ENV));
+	return ((*tokens)->type == TOKEN_ENV && (*tokens)->next
+		&& (*tokens)->next->type != TOKEN_WHITESPACE
+		&& (*tokens)->next->type != TOKEN_EOF
+		&& (*tokens)->next->type != TOKEN_EMPTY) || ((*tokens)->next
+		&& (*tokens)->next->type == TOKEN_ENV)
+		|| ((*tokens)->next->type == TOKEN_EMPTY
+		&& (*tokens)->next->next->type == TOKEN_WORD);
 }
 
 bool	is_redirection_token(t_token **tokens)
