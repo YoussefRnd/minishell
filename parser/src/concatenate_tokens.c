@@ -6,7 +6,7 @@
 /*   By: yboumlak <yboumlak@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 19:15:07 by yboumlak          #+#    #+#             */
-/*   Updated: 2024/09/13 13:06:34 by yboumlak         ###   ########.fr       */
+/*   Updated: 2024/09/15 19:59:34 by yboumlak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void	concatenate_tokens_if_needed(t_token **tokens)
 	char	*value;
 
 	while ((*tokens)->next && ((*tokens)->next->type == TOKEN_WORD
-			|| (*tokens)->next->type == TOKEN_WILDCARD)
+			|| (*tokens)->next->type == TOKEN_WILDCARD || (*tokens)->next->type == TOKEN_EMPTY && (*tokens)->type != TOKEN_ENV)
 		&& (*tokens)->is_atached != 1)
 	{
 		value = ft_strjoin((*tokens)->value, (*tokens)->next->value);
