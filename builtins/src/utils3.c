@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 17:20:06 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/09/13 00:52:02 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/09/15 13:49:42 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,11 @@ int	update_node_if_key_matches(t_env *node, t_env *new_node)
 {
 	if (ft_strcmp(node->key, new_node->key) == 0)
 	{
+		if (node->value && !new_node->value)
+		{
+			free_node(&new_node);
+			return (1);
+		}
 		free(node->value);
 		node->value = ft_strdup(new_node->value);
 		free_node(&new_node);

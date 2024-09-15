@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 11:42:38 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/09/14 16:33:58 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/09/15 13:43:29 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,5 +57,6 @@ void			left_side(t_tree_node *tree, t_env **env, bool *forked,
 					int *pfd);
 void			right_side(t_tree_node *tree, t_env **env, bool *forked,
 					int *pfd);
+int				its_a_directory(char *value);
 
 #endif
