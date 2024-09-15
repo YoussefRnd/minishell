@@ -6,7 +6,7 @@
 /*   By: hbrahimi <hbrahimi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 17:23:31 by hbrahimi          #+#    #+#             */
-/*   Updated: 2024/09/15 14:59:22 by hbrahimi         ###   ########.fr       */
+/*   Updated: 2024/09/15 15:52:46 by hbrahimi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ void	words_deal(t_tree_node *tree, t_env **env, bool *forked)
 	pid_t	pid;
 
 	signal(SIGINT, SIG_IGN);
+	*forked = false;
 	pid = fork();
 	if (pid == 0)
 	{
